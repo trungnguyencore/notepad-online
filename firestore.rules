@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Cho phép truy cập không cần xác thực
+    // Bảo mật dựa trên độ khó đoán của Sync Key (SHA-256 hash)
+    match /sync_data/{hashKey} {
+      // Document gốc - cho phép đọc để kiểm tra tồn tại
+      allow get: if true;
+      
+      // Subcollection notes dưới mỗi hashKey
+      match /notes/{noteId} {
+        // Cho phép đọc và ghi không cần auth
+        // Chỉ người biết hashKey mới truy cập được đường dẫn này
+        allow read, write: if true;
+        
+        // Giới hạn kích thước document
+        // Mỗi ghi chú tối đa ~1MB (giới hạn mặc định của Firestore)
+      }
+    }
+    
+    // Từ chối mọi truy cập khác
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
