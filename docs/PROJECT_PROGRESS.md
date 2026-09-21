@@ -2,7 +2,7 @@
 
 - **Last verified:** 2026-09-21
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** folder organization + Instagram attribution đã implement/test local với Firestore production backend; Vercel production UI chưa push/deploy folder code.
+- **Status:** folder organization v1 + Instagram attribution đã push GitHub, auto-deploy Vercel production và production smoke PASS.
 - **Backlog:** `docs\TODOLIST.md`
 - **AI rules:** `.claude\CLAUDE.md`
 
@@ -49,14 +49,15 @@ notepad app online/
 ## 3. Git state at verification
 
 - Branch: `main`, remote `https://github.com/trungnguyencore/notepad-online.git`.
-- Local/remote baseline trước folder work: commit `1f88301e68fbe5f619a5ab1be09d85b26d3c310e`.
-- Folder/Instagram implementation hiện là uncommitted working-tree changes; chưa push/deploy Vercel.
+- Folder feature commit đã push lên `main`: `d9165d0c8c9248df3cfaf2ee5e035650f2b09de8` (`feat: add note folders and attribution`).
+- GitHub remote: `https://github.com/trungnguyencore/notepad-online.git`.
 - `.env` vẫn ignored/untracked; không được đọc hoặc stage trong task này.
 
 ## 4. Verification status
 
-- Production URL hiện tại: `https://notepad-online-beta.vercel.app`; UI production vẫn ở baseline trước folder feature cho tới khi code được push.
-- Vercel project `trunknguen/notepad-online` auto-deploy từ GitHub `main` đã verify trước đó.
+- Production URL: `https://notepad-online-beta.vercel.app`; folder UI hiện đã deploy production.
+- Vercel deployment folder rollout: `https://notepad-online-k9ioc8h0z-trunknguen.vercel.app`, status `Ready`, created 2026-09-21 14:35:21 +07:00.
+- Vercel project `trunknguen/notepad-online` auto-deploy từ GitHub `main` PASS sau push commit `d9165d0`.
 - Firestore project: `notepad-app-6845e`; `firestore.rules` folder rules compiled và deploy PASS ngày 2026-09-21.
 - Existing note CRUD isolated-key acceptance: create → autosave → refresh persistence → delete cleanup PASS.
 - Chưa xác minh PWA/offline behavior.
@@ -97,20 +98,21 @@ notepad app online/
 - Final `npm run build`: PASS, 1703 modules; JS 814.74 kB minified / 231.51 kB gzip; Vite chunk >500 kB warning vẫn còn.
 - Firestore rules: added `folders` read/create/update; folder delete intentionally denied trong folder v1. Rules compiled + released to `cloud.firestore` on project `notepad-app-6845e`.
 - Branding: header attribution `@trunk.ng` links to `https://www.instagram.com/trunk.ng/`, target `_blank`; verified in browser.
-- Vercel production UI chưa chứa folder code vì working tree chưa được commit/push.
+- Production rollout PASS: `d9165d0` → Vercel Ready → alias `https://notepad-online-beta.vercel.app`.
+- Production mobile smoke 393×852 PASS: `@trunk.ng` link đúng; folder home hiện; create folder PASS; rename PASS; note tạo trong folder nhận đúng picker; nội dung persist; move về `Chưa phân loại` PASS; overflowX=0; nested button=0; visible small button count=0; note cleanup=0; console=[] .
+- Production test workspace đã cleanup bằng Firebase CLI recursive delete, exit code 0.
 
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
-Folder organization v1 đã implement/test local với Firestore production backend. Việc còn lại gần nhất là push/deploy UI folder khi user yêu cầu, sau đó production smoke. Firestore rules vẫn permissive theo mô hình Sync Key và cần hardening riêng; bundle >500 kB vẫn còn.
+Folder organization v1 đã deploy production và smoke PASS. Việc còn lại: user acceptance trên thiết bị thật, bundle/code-splitting, Firestore Rules hardening và feature backlog tiếp theo.
 
 ## 7. Next actions
 
-1. Khi user yêu cầu deploy: review staged diff, commit/push folder feature lên `main`, chờ Vercel Ready.
-2. Chạy production smoke cho create/rename folder, folder-scoped note, move note và `@trunk.ng` link.
-3. Sau deploy, tiếp tục bundle/code-splitting và Firestore Rules hardening.
-4. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
-5. Tiếp tục backlog feature (toast/search/shortcuts...) sau folder rollout.
+1. User test folder workflow trên production/iPhone thật.
+2. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
+3. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
+4. Tiếp tục backlog feature (toast/search/shortcuts...) sau folder rollout.
 
 ## 8. Archive rule
 
@@ -125,4 +127,5 @@ Mọi công việc Notepad mặc định phải thực hiện ở project hiện
 - 2026-09-21: Mobile/runtime audit xác minh build + CRUD PASS, tái hiện data-loss khi chuyển note nhanh, đo touch-target/mobile stacking và ghi lại bundle/meta warnings.
 - 2026-09-21: Tạo backup pre-mobile rồi implement iPhone stabilization: flush autosave, mobile master/detail, 44px touch targets, 16px Sync Key input, nested-button fix, confirm dialog và PWA meta; final mobile + desktop regression PASS.
 - 2026-09-21: Commit `fba947a` push lên `trungnguyencore/notepad-online`; Vercel Git integration auto-deploy production PASS; production alias `notepad-online-beta.vercel.app` mobile smoke + isolated CRUD cleanup PASS.
-- 2026-09-21: Tạo backup pre-folders, implement folder create/rename + note folder assignment + desktop 3-pane/mobile 3-step + `@trunk.ng` Instagram attribution; deploy Firestore folder rules; desktop/mobile regression PASS. UI folder chưa push/deploy Vercel.
+- 2026-09-21: Tạo backup pre-folders, implement folder create/rename + note folder assignment + desktop 3-pane/mobile 3-step + `@trunk.ng` Instagram attribution; deploy Firestore folder rules; desktop/mobile regression PASS.
+- 2026-09-21: Push commit `d9165d0` lên `main`; Vercel auto-deploy folder UI Ready; production alias `notepad-online-beta.vercel.app` smoke PASS cho create/rename folder, folder-scoped note, move-to-Unfiled và Instagram attribution; test workspace cleanup PASS.

@@ -17,7 +17,7 @@
 ## Verified Git evidence
 - Branch local: `main`; remote `https://github.com/trungnguyencore/notepad-online.git`.
 - Baseline before folder feature: local/remote HEAD `1f88301e68fbe5f619a5ab1be09d85b26d3c310e`.
-- Folder/Instagram changes are currently uncommitted; no push/deploy UI performed in this task yet.
+- Folder/Instagram rollout commit: `d9165d0c8c9248df3cfaf2ee5e035650f2b09de8`, pushed to `main`.
 - `.env` remains ignored and was not read/staged.
 
 ## Runtime/mobile evidence — 2026-09-21
@@ -45,6 +45,11 @@
 - Final `npm run build`: PASS, 1703 modules; JS 814.74 kB minified / 231.51 kB gzip; chunk warning remains.
 - Instagram anchor verified in browser: text `@trunk.ng`, href `https://www.instagram.com/trunk.ng/`, target `_blank`.
 
+## Production folder rollout evidence — 2026-09-21
+- Git push: `1f88301..d9165d0` to `trungnguyencore/notepad-online` `main`.
+- Vercel deployment `https://notepad-online-k9ioc8h0z-trunknguen.vercel.app`, status Ready, created 2026-09-21 14:35:21 +07:00; alias `https://notepad-online-beta.vercel.app` points to it.
+- Production Selenium mobile smoke 393×852: Instagram text/href/target correct; foldersHome=true; folderCreated=true; rename=true; persistedContent=true; pickerAfterMove=`Chưa phân loại`; overflowX=0; nested=0; small=0; noteCleanupRemaining=0; console=[] .
+- Production test Sync Key root cleanup via Firebase CLI recursive delete completed with exit code 0.
+
 ## Still unverified
-- Folder UI is not yet deployed on Vercel production; current production alias still serves pre-folder UI until next push.
 - Firestore rule hardening beyond current Sync-Key model and PWA offline behavior remain open.

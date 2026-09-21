@@ -2,7 +2,7 @@
 
 - Last verified: 2026-09-21
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: Folder organization v1 + `@trunk.ng` attribution implemented and regression-tested locally against Firestore production backend. Firestore folder rules are deployed; Vercel production UI still awaits folder-code push/deploy.
+- Current phase: Folder organization v1 + `@trunk.ng` attribution deployed to production and production smoke PASS.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
@@ -34,16 +34,20 @@
 - Header `@trunk.ng` link to `https://www.instagram.com/trunk.ng/` verified.
 - Final build PASS: 1703 modules, JS 814.74 kB / 231.51 kB gzip; chunk >500 kB warning remains.
 
+## Production folder rollout verified 2026-09-21
+- GitHub `main` commit `d9165d0` contains folder UI + Instagram attribution + Firebase config/rules source.
+- Vercel auto-deploy PASS; deployment `notepad-online-k9ioc8h0z-trunknguen.vercel.app` Ready and production alias updated.
+- Production mobile smoke 393×852 PASS: folder create/rename, note-in-folder, persistence, move to Unfiled, `@trunk.ng` link, overflowX=0, nested=0, no visible button <44px, console clean.
+- Production smoke workspace cleanup PASS via Firebase CLI recursive delete.
+
 ## Not verified yet
-- Folder UI has not been pushed/deployed to Vercel production yet; current production UI remains baseline `1f88301`.
 - Firestore Rules hardening beyond current Sync-Key trust model remains open.
 - PWA/offline behavior remains open.
 - Không có test/lint script canonical trong `package.json`.
 
 ## Next actions
-1. On explicit user deploy request: stage/review diff, commit/push folder feature to `main`.
-2. Wait for Vercel Ready and run production folder/Instagram smoke.
-3. Then continue bundle optimization + Firestore Rules hardening.
-4. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
+1. User acceptance on real device for folder workflow.
+2. Continue bundle optimization + Firestore Rules hardening.
+3. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
 
 > Nếu mâu thuẫn, `docs\PROJECT_PROGRESS.md` và source/Git evidence mới hơn thắng.
