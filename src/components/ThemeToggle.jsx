@@ -5,7 +5,7 @@ export default function ThemeToggle({ darkMode, onToggle }) {
   return (
     <button
       onClick={onToggle}
-      className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-apple-bg-tertiary active:scale-90"
+      className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-apple-bg-tertiary active:scale-90"
       aria-label={darkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
     >
       {darkMode ? (

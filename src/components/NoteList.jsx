@@ -49,7 +49,7 @@ export default function NoteList({
                 </div>
                 <button
                     onClick={onCreate}
-                    className="w-9 h-9 rounded-full bg-apple-accent text-black flex items-center justify-center hover:bg-apple-accent-hover active:scale-95 transition"
+                    className="w-11 h-11 rounded-full bg-apple-accent text-black flex items-center justify-center hover:bg-apple-accent-hover active:scale-95 transition"
                     aria-label="Tạo ghi chú mới"
                 >
                     <Plus size={18} />
@@ -79,40 +79,42 @@ export default function NoteList({
                     const preview = getPreviewText(note.content).slice(0, 80);
 
                     return (
-                        <button
+                        <div
                             key={note.id}
-                            onClick={() => onSelect(note.id)}
-                            className={`note-card w-full text-left rounded-note border px-4 py-3 transition ${isActive
+                            className={`note-card flex w-full items-stretch rounded-note border transition ${isActive
                                     ? 'bg-apple-bg-primary border-apple-accent ring-2 ring-apple-accent'
                                     : 'bg-apple-bg-primary border-apple-border'
                                 }`}
                         >
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                    <p className="text-note-title text-apple-text-primary truncate">
-                                        {note.title || 'Ghi chú mới'}
-                                    </p>
-                                    <p className="text-note-caption text-apple-text-secondary truncate">
-                                        {preview || 'Nội dung đang trống'}
-                                    </p>
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                    <span className="text-[11px] text-apple-text-secondary">
+                            <button
+                                type="button"
+                                onClick={() => onSelect(note.id)}
+                                className="min-w-0 flex-1 px-4 py-3 text-left"
+                                aria-current={isActive ? 'true' : undefined}
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="text-note-title text-apple-text-primary truncate">
+                                            {note.title || 'Ghi chú mới'}
+                                        </p>
+                                        <p className="text-note-caption text-apple-text-secondary truncate">
+                                            {preview || 'Nội dung đang trống'}
+                                        </p>
+                                    </div>
+                                    <span className="shrink-0 text-[11px] text-apple-text-secondary">
                                         {formatNoteDate(note.updatedAt)}
                                     </span>
-                                    <button
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            onDelete(note.id);
-                                        }}
-                                        className="w-7 h-7 rounded-full flex items-center justify-center text-apple-text-secondary hover:text-apple-danger hover:bg-apple-bg-tertiary transition"
-                                        aria-label="Xóa ghi chú"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
                                 </div>
-                            </div>
-                        </button>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onDelete(note.id)}
+                                className="m-1 flex w-11 shrink-0 items-center justify-center rounded-xl text-apple-text-secondary hover:text-apple-danger hover:bg-apple-bg-tertiary active:scale-95 transition"
+                                aria-label={`Xóa ${note.title || 'ghi chú'}`}
+                            >
+                                <Trash2 size={17} />
+                            </button>
+                        </div>
                     );
                 })}
             </div>

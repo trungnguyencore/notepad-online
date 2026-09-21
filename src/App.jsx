@@ -7,6 +7,7 @@ import NoteEditor from './components/NoteEditor';
 import NoteList from './components/NoteList';
 import SyncKeyModal from './components/SyncKeyModal';
 import ThemeToggle from './components/ThemeToggle';
+import ConfirmDialog from './components/ConfirmDialog';
 
 const SYNC_KEY_STORAGE = 'notepad-sync-key';
 
@@ -14,6 +15,8 @@ export default function App() {
     const [syncKey, setSyncKey] = useState(() => localStorage.getItem(SYNC_KEY_STORAGE) || '');
     const [selectedNoteId, setSelectedNoteId] = useState(null);
     const [showSyncModal, setShowSyncModal] = useState(!syncKey);
+    const [pendingDeleteId, setPendingDeleteId] = useState(null);
+    const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
 
     const { notes, loading, error, createNote, updateNote, deleteNote } = useNotes(syncKey);
     const { darkMode, toggleTheme } = useTheme();
@@ -26,24 +29,48 @@ export default function App() {
     }, [syncKey]);
 
     useEffect(() => {
+        const media = window.matchMedia('(min-width: 1024px)');
+        const updateViewport = () => setIsDesktop(media.matches);
+        updateViewport();
+        media.addEventListener('change', updateViewport);
+        return () => media.removeEventListener('change', updateViewport);
+    }, []);
+
+    useEffect(() => {
         if (!notes.length) {
             setSelectedNoteId(null);
             return;
         }
 
-        if (!selectedNoteId || !notes.some(note => note.id === selectedNoteId)) {
+        const selectionExists = selectedNoteId && notes.some(note => note.id === selectedNoteId);
+        if (selectedNoteId && !selectionExists) {
+            setSelectedNoteId(null);
+            return;
+        }
+
+        if (isDesktop && !selectedNoteId) {
             setSelectedNoteId(notes[0].id);
         }
-    }, [notes, selectedNoteId]);
+    }, [notes, selectedNoteId, isDesktop]);
 
     const handleCreateNote = useCallback(async () => {
         const newId = await createNote();
         if (newId) setSelectedNoteId(newId);
     }, [createNote]);
 
-    const handleDeleteNote = useCallback(async (noteId) => {
+    const handleDeleteNote = useCallback((noteId) => {
+        setPendingDeleteId(noteId);
+    }, []);
+
+    const handleConfirmDelete = useCallback(async () => {
+        if (!pendingDeleteId) return;
+        const noteId = pendingDeleteId;
+        setPendingDeleteId(null);
         await deleteNote(noteId);
-    }, [deleteNote]);
+        if (selectedNoteId === noteId) setSelectedNoteId(null);
+    }, [deleteNote, pendingDeleteId, selectedNoteId]);
+
+    const handleCancelDelete = useCallback(() => setPendingDeleteId(null), []);
 
     const handleSubmitSyncKey = useCallback((key) => {
         const trimmed = key.trim();
@@ -57,6 +84,7 @@ export default function App() {
     const handleCloseSyncModal = useCallback(() => setShowSyncModal(false), []);
 
     const selectedNote = notes.find(note => note.id === selectedNoteId) || null;
+    const pendingDeleteNote = notes.find(note => note.id === pendingDeleteId) || null;
     const maskedKey = useMemo(() => {
         if (!syncKey) return '';
         if (syncKey.length <= 6) return `${syncKey.slice(0, 2)}***`;
@@ -82,7 +110,7 @@ export default function App() {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={handleOpenSyncModal}
-                                className="flex items-center gap-2 px-3 py-2 rounded-full bg-apple-bg-secondary text-note-caption text-apple-text-primary hover:bg-apple-bg-tertiary transition"
+                                className="flex min-h-11 items-center gap-2 px-4 py-2 rounded-full bg-apple-bg-secondary text-note-caption text-apple-text-primary hover:bg-apple-bg-tertiary active:scale-95 transition"
                             >
                                 <KeyRound size={16} />
                                 Sync Key
@@ -98,7 +126,7 @@ export default function App() {
                     )}
 
                     <main className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
-                        <aside className="bg-apple-bg-secondary rounded-2xl p-3 shadow-sm">
+                        <aside className={`${selectedNoteId ? 'hidden lg:block' : 'block'} h-[calc(100dvh-180px)] min-h-[420px] bg-apple-bg-secondary rounded-2xl p-3 shadow-sm lg:h-auto lg:min-h-0`}>
                             <NoteList
                                 notes={notes}
                                 loading={loading}
@@ -108,7 +136,7 @@ export default function App() {
                                 onDelete={handleDeleteNote}
                             />
                         </aside>
-                        <section className="bg-apple-bg-secondary rounded-2xl p-4 shadow-sm min-h-[60vh]">
+                        <section className={`${selectedNoteId ? 'block' : 'hidden lg:block'} h-[calc(100dvh-180px)] min-h-[420px] bg-apple-bg-secondary rounded-2xl p-4 shadow-sm lg:h-auto lg:min-h-[60vh]`}>
                             {loading ? (
                                 <div className="h-full flex items-center justify-center text-note-caption text-apple-text-secondary">
                                     Đang đồng bộ...
@@ -120,6 +148,7 @@ export default function App() {
                                     note={selectedNote}
                                     onUpdate={updateNote}
                                     onDelete={handleDeleteNote}
+                                    onBack={() => setSelectedNoteId(null)}
                                 />
                             )}
                         </section>
@@ -134,6 +163,14 @@ export default function App() {
                 onClose={handleCloseSyncModal}
                 canClose={Boolean(syncKey)}
                 noteCount={notes.length}
+            />
+
+            <ConfirmDialog
+                open={Boolean(pendingDeleteId)}
+                title="Xóa ghi chú?"
+                message={`Ghi chú “${pendingDeleteNote?.title || 'Ghi chú mới'}” sẽ bị xóa vĩnh viễn.`}
+                onCancel={handleCancelDelete}
+                onConfirm={handleConfirmDelete}
             />
         </div>
     );

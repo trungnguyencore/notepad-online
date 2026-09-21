@@ -95,15 +95,17 @@ export function useNotes(syncKey) {
   }, []);
 
   const updateNote = useCallback(async (noteId, data) => {
-    if (!hashRef.current) return;
+    if (!hashRef.current) return false;
     try {
       const noteRef = doc(db, 'sync_data', hashRef.current, 'notes', noteId);
       await updateDoc(noteRef, {
         ...data,
         updatedAt: serverTimestamp(),
       });
+      return true;
     } catch (err) {
       setError(err.message);
+      return false;
     }
   }, []);
 

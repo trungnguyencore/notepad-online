@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Bold, Italic, List, ListOrdered, Quote, Trash2, Underline as UnderlineIcon } from 'lucide-react';
+import { Bold, ChevronLeft, Italic, List, ListOrdered, Quote, Trash2, Underline as UnderlineIcon } from 'lucide-react';
 
 const SAVE_DELAY = 450;
 
@@ -42,10 +42,13 @@ function ToolbarButton({ active, onClick, label, children }) {
     );
 }
 
-export default function NoteEditor({ note, onUpdate, onDelete }) {
+export default function NoteEditor({ note, onUpdate, onDelete, onBack }) {
     const [draftTitle, setDraftTitle] = useState(note?.title || 'Ghi chú mới');
     const [draftContent, setDraftContent] = useState(note?.content || '');
     const [saveState, setSaveState] = useState('idle');
+    const draftRef = useRef({ title: note?.title || 'Ghi chú mới', content: note?.content || '' });
+    const persistedRef = useRef({ title: note?.title || 'Ghi chú mới', content: note?.content || '' });
+    const activeNoteIdRef = useRef(note?.id || null);
 
     const editor = useEditor(
         {
@@ -67,6 +70,7 @@ export default function NoteEditor({ note, onUpdate, onDelete }) {
             onUpdate: ({ editor }) => {
                 const html = editor.getHTML();
                 const title = getTitleFromText(editor.getText());
+                draftRef.current = { title, content: html };
                 setDraftTitle(title);
                 setDraftContent(html);
             },
@@ -75,33 +79,59 @@ export default function NoteEditor({ note, onUpdate, onDelete }) {
     );
 
     useEffect(() => {
-        setDraftTitle(note?.title || 'Ghi chú mới');
-        setDraftContent(note?.content || '');
+        const initial = {
+            title: note?.title || 'Ghi chú mới',
+            content: note?.content || '',
+        };
+        activeNoteIdRef.current = note?.id || null;
+        draftRef.current = initial;
+        persistedRef.current = initial;
+        setDraftTitle(initial.title);
+        setDraftContent(initial.content);
         setSaveState('idle');
-    }, [note?.id]);
+
+        return () => {
+            if (!note?.id) return;
+            const pending = draftRef.current;
+            const persisted = persistedRef.current;
+            if (pending.title === persisted.title && pending.content === persisted.content) return;
+            onUpdate(note.id, {
+                title: pending.title || 'Ghi chú mới',
+                content: pending.content || '',
+            });
+        };
+    }, [note?.id, onUpdate]);
 
     useEffect(() => {
-        if (!note) return;
+        if (!note?.id) return undefined;
 
-        const currentTitle = note.title || 'Ghi chú mới';
-        const currentContent = note.content || '';
-        if (draftTitle === currentTitle && draftContent === currentContent) return;
+        const pending = {
+            title: draftTitle || 'Ghi chú mới',
+            content: draftContent || '',
+        };
+        draftRef.current = pending;
+        const persisted = persistedRef.current;
+        if (pending.title === persisted.title && pending.content === persisted.content) return undefined;
 
         setSaveState('saving');
         const timer = setTimeout(async () => {
-            await onUpdate(note.id, {
-                title: draftTitle || 'Ghi chú mới',
-                content: draftContent || '',
-            });
+            const ok = await onUpdate(note.id, pending);
+            if (activeNoteIdRef.current !== note.id) return;
+            if (ok === false) {
+                setSaveState('error');
+                return;
+            }
+            persistedRef.current = pending;
             setSaveState('saved');
         }, SAVE_DELAY);
 
         return () => clearTimeout(timer);
-    }, [draftTitle, draftContent, note, onUpdate]);
+    }, [draftTitle, draftContent, note?.id, onUpdate]);
 
     const statusLabel = useMemo(() => {
         if (saveState === 'saving') return 'Đang lưu...';
         if (saveState === 'saved') return 'Đã lưu';
+        if (saveState === 'error') return 'Lỗi lưu';
         return 'Tự động lưu';
     }, [saveState]);
 
@@ -116,25 +146,34 @@ export default function NoteEditor({ note, onUpdate, onDelete }) {
     return (
         <div className="flex h-full flex-col">
             <div className="flex flex-col gap-4 border-b border-apple-border pb-4">
-                <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <h2 className="text-note-title text-apple-text-primary">
+                <div className="flex items-start gap-2 sm:gap-4">
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-apple-text-secondary hover:bg-apple-bg-tertiary active:scale-95 transition lg:hidden"
+                        aria-label="Quay lại danh sách ghi chú"
+                    >
+                        <ChevronLeft size={22} />
+                    </button>
+                    <div className="min-w-0 flex-1">
+                        <h2 className="text-note-title text-apple-text-primary break-words">
                             {draftTitle || note.title || 'Ghi chú mới'}
                         </h2>
-                        <p className="text-note-caption text-apple-text-secondary">
+                        <p className={`text-note-caption ${saveState === 'error' ? 'text-apple-danger' : 'text-apple-text-secondary'}`}>
                             Cập nhật {formatDetailDate(note.updatedAt)} · {statusLabel}
                         </p>
                     </div>
                     <button
+                        type="button"
                         onClick={() => onDelete(note.id)}
-                        className="flex items-center gap-2 px-3 py-2 rounded-full text-note-caption text-apple-text-secondary hover:text-apple-danger hover:bg-apple-bg-tertiary transition"
+                        className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full px-3 text-note-caption text-apple-text-secondary hover:text-apple-danger hover:bg-apple-bg-tertiary active:scale-95 transition"
                     >
-                        <Trash2 size={16} />
-                        Xóa
+                        <Trash2 size={17} />
+                        <span className="hidden sm:inline">Xóa</span>
                     </button>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">
                     <ToolbarButton
                         label="Bold"
                         active={editor?.isActive('bold')}
