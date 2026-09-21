@@ -21,7 +21,7 @@
 - TipTap rich-text editor.
 - Firebase Firestore.
 - Sync Key được SHA-256 trước khi dùng làm Firestore document path.
-- Vercel config có trong `vercel.json`; production deployment chưa được verify trong session hiện tại.
+- Vercel config có trong `vercel.json`; production alias verified 2026-09-21 tại `https://notepad-online-beta.vercel.app`.
 
 ## Critical rules
 Không đọc `.env` nếu task không cần.

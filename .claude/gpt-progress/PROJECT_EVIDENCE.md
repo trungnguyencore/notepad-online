@@ -28,5 +28,11 @@
 - Desktop 1440×900: two-pane visible, persistence PASS, nested button=0, cleanup=0, console sạch.
 - Browser console post-fix sạch trong các flow đã test.
 
+## Production deployment evidence — 2026-09-21
+- GitHub push: `a837440..fba947a`, branch `main`, remote `trungnguyencore/notepad-online`.
+- Vercel project account remains `trunknguen`; Git integration auto-created deployment `https://notepad-online-mur34tw7l-trunknguen.vercel.app`.
+- Deployment status `Ready`, created 2026-09-21 13:16:24 +07:00; production alias `https://notepad-online-beta.vercel.app` points to it.
+- Production Selenium mobile smoke 393×852: title correct, input 16px, overflowX=0, fast-switch persisted=true, nested=0, small touch target count=0, confirm visible=true, cleanup remaining=0, console=[] .
+
 ## Still unverified
-Chưa xác nhận URL production/Vercel, Firestore Rules deployment hoặc PWA offline behavior.
+Chưa xác nhận Firestore Rules deployment/config cụ thể, physical Safari/iPhone hoặc PWA offline behavior.

@@ -2,7 +2,7 @@
 
 - Last verified: 2026-09-21
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: iPhone/mobile stabilization implementation complete in local working tree; final mobile + desktop regression PASS. Physical iPhone/Safari and production deploy remain unverified.
+- Current phase: iPhone/mobile stabilization deployed to production and verified. Physical iPhone/Safari remains unverified; bundle optimization + Firestore Rules hardening remain.
 
 ## Verified current state
 - App source đã có `App.jsx`, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
@@ -20,16 +20,20 @@
 - Confirm delete PASS (cancel giữ note, confirm mới xóa).
 - Desktop 1440×900 two-pane + persistence + cleanup PASS.
 
+## Production verified 2026-09-21
+- GitHub main commit `fba947a` pushed to `trungnguyencore/notepad-online`.
+- Vercel Git auto-deploy PASS; production alias `https://notepad-online-beta.vercel.app` Ready.
+- Production mobile smoke PASS: fast-switch persistence, 16px Sync Key, no horizontal overflow, nested button=0, visible touch targets >=44px, confirm delete, cleanup=0, console clean.
+
 ## Not verified yet
-- Production URL/Vercel project hiện tại.
-- Firestore Rules deployment state.
-- PWA/offline behavior.
+- Firestore Rules deployment/config beyond successful production CRUD behavior.
+- Physical Safari/iPhone and PWA/offline behavior.
 - Không có test/lint script canonical trong `package.json`.
 
 ## Next actions
 1. Physical iPhone/Safari + keyboard/safe-area/PWA standalone check.
 2. Bundle/code-splitting optimization.
-3. Verify production Vercel + Firestore Rules.
+3. Verify/harden Firestore Rules production.
 4. Continue feature backlog after mobile acceptance.
 
 > Nếu mâu thuẫn, `docs\PROJECT_PROGRESS.md` và source/Git evidence mới hơn thắng.
