@@ -12,9 +12,13 @@ service cloud.firestore {
         // Cho phép đọc và ghi không cần auth
         // Chỉ người biết hashKey mới truy cập được đường dẫn này
         allow read, write: if true;
-        
-        // Giới hạn kích thước document
-        // Mỗi ghi chú tối đa ~1MB (giới hạn mặc định của Firestore)
+      }
+
+      // Folder là metadata song song với notes; note giữ field folderId để tương thích dữ liệu cũ.
+      match /folders/{folderId} {
+        allow read, create, update: if true;
+        // Bản folder v1 chưa có UI xóa folder, nên không mở delete.
+        allow delete: if false;
       }
     }
     

@@ -20,12 +20,13 @@ Không suy diễn tiến độ từ tên file và không sửa file ngoài phạ
 - Backlog: `docs\TODOLIST.md`
 - Legacy archive: `D:\OTHERS\LATVAT\notepad_old`
 - Pre-mobile backup: `D:\OTHERS\LATVAT\notepad app online_backup_2026-09-21_pre_mobile`
+- Pre-folders backup: `D:\OTHERS\LATVAT\notepad app online_backup_2026-09-21_pre_folders`
 
 ## Critical workspace rule
 
 `notepad_old` là bản cũ chỉ để reference.
 Không chỉnh sửa, move, rename hoặc xóa folder đó.
-Backup `notepad app online_backup_2026-09-21_pre_mobile` là snapshot fallback; không chỉnh sửa nó trừ khi user yêu cầu restore rõ ràng.
+Backup `notepad app online_backup_2026-09-21_pre_mobile` và `notepad app online_backup_2026-09-21_pre_folders` là snapshot fallback; không chỉnh sửa chúng trừ khi user yêu cầu restore rõ ràng.
 Mọi task Notepad mặc định phải làm trong project hiện tại.
 ## Technical scope
 

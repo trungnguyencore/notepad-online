@@ -6,6 +6,7 @@
 - AI rules: `.claude\CLAUDE.md`
 - Legacy archive: `D:\OTHERS\LATVAT\notepad_old`
 - Pre-mobile backup: `D:\OTHERS\LATVAT\notepad app online_backup_2026-09-21_pre_mobile`
+- Pre-folders backup: `D:\OTHERS\LATVAT\notepad app online_backup_2026-09-21_pre_folders`
 - Last verified: 2026-09-21
 
 ## Source priority
@@ -21,9 +22,13 @@
 - TipTap rich-text editor.
 - Firebase Firestore.
 - Sync Key được SHA-256 trước khi dùng làm Firestore document path.
-- Vercel config có trong `vercel.json`; production alias verified 2026-09-21 tại `https://notepad-online-beta.vercel.app`.
+- Notes: `sync_data/{hash}/notes/{noteId}`; folder organization dùng `folderId` nullable để giữ backward compatibility.
+- Folders: `sync_data/{hash}/folders/{folderId}`; create/read/update rules đã deploy, delete deny trong v1.
+- Desktop folder UI = 3 pane; mobile = Folders → Notes → Editor.
+- Vercel config có trong `vercel.json`; production alias verified tại `https://notepad-online-beta.vercel.app`, nhưng folder UI hiện chưa push/deploy.
 
 ## Critical rules
 Không đọc `.env` nếu task không cần.
 Không biến TODO thành fact đã hoàn thành.
 Không sửa hoặc xóa `notepad_old`.
+Không chỉnh sửa backup pre-mobile/pre-folders trừ khi user yêu cầu restore rõ ràng.

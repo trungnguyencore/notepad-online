@@ -4,6 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Bold, ChevronLeft, Italic, List, ListOrdered, Quote, Trash2, Underline as UnderlineIcon } from 'lucide-react';
+import FolderPicker from './FolderPicker';
 
 const SAVE_DELAY = 450;
 
@@ -42,7 +43,7 @@ function ToolbarButton({ active, onClick, label, children }) {
     );
 }
 
-export default function NoteEditor({ note, onUpdate, onDelete, onBack }) {
+export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDelete, onBack }) {
     const [draftTitle, setDraftTitle] = useState(note?.title || 'Ghi chú mới');
     const [draftContent, setDraftContent] = useState(note?.content || '');
     const [saveState, setSaveState] = useState('idle');
@@ -171,6 +172,14 @@ export default function NoteEditor({ note, onUpdate, onDelete, onBack }) {
                         <Trash2 size={17} />
                         <span className="hidden sm:inline">Xóa</span>
                     </button>
+                </div>
+
+                <div className="flex items-center justify-between gap-3">
+                    <FolderPicker
+                        folders={folders}
+                        value={note.folderId || ''}
+                        onChange={(folderId) => onMoveFolder(note.id, folderId)}
+                    />
                 </div>
 
                 <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">

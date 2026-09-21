@@ -1,62 +1,132 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { KeyRound } from 'lucide-react';
+import { Instagram, KeyRound } from 'lucide-react';
+import { useFolders } from './hooks/useFolders';
 import { useNotes } from './hooks/useNotes';
 import { useTheme } from './hooks/useTheme';
+import ConfirmDialog from './components/ConfirmDialog';
 import EmptyState from './components/EmptyState';
+import FolderDialog from './components/FolderDialog';
+import FolderList from './components/FolderList';
 import NoteEditor from './components/NoteEditor';
 import NoteList from './components/NoteList';
 import SyncKeyModal from './components/SyncKeyModal';
 import ThemeToggle from './components/ThemeToggle';
-import ConfirmDialog from './components/ConfirmDialog';
 
 const SYNC_KEY_STORAGE = 'notepad-sync-key';
+const ALL_FOLDER = 'all';
+const UNFILED_FOLDER = 'unfiled';
+const INSTAGRAM_URL = 'https://www.instagram.com/trunk.ng/';
 
 export default function App() {
     const [syncKey, setSyncKey] = useState(() => localStorage.getItem(SYNC_KEY_STORAGE) || '');
+    const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
+    const [selectedFolderId, setSelectedFolderId] = useState(() =>
+        window.matchMedia('(min-width: 1024px)').matches ? ALL_FOLDER : null
+    );
     const [selectedNoteId, setSelectedNoteId] = useState(null);
     const [showSyncModal, setShowSyncModal] = useState(!syncKey);
     const [pendingDeleteId, setPendingDeleteId] = useState(null);
-    const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
+    const [folderDialog, setFolderDialog] = useState({ open: false, mode: 'create', folder: null });
 
     const { notes, loading, error, createNote, updateNote, deleteNote } = useNotes(syncKey);
+    const {
+        folders,
+        loading: foldersLoading,
+        error: folderError,
+        createFolder,
+        renameFolder,
+    } = useFolders(syncKey);
     const { darkMode, toggleTheme } = useTheme();
 
     useEffect(() => {
-        if (!syncKey) {
-            setSelectedNoteId(null);
-            setShowSyncModal(true);
-        }
+        setSelectedNoteId(null);
+        setPendingDeleteId(null);
+        setSelectedFolderId(window.matchMedia('(min-width: 1024px)').matches ? ALL_FOLDER : null);
+        if (!syncKey) setShowSyncModal(true);
     }, [syncKey]);
 
     useEffect(() => {
         const media = window.matchMedia('(min-width: 1024px)');
-        const updateViewport = () => setIsDesktop(media.matches);
+        const updateViewport = () => {
+            setIsDesktop(media.matches);
+            if (media.matches) {
+                setSelectedFolderId(current => current || ALL_FOLDER);
+            }
+        };
         updateViewport();
         media.addEventListener('change', updateViewport);
         return () => media.removeEventListener('change', updateViewport);
     }, []);
 
     useEffect(() => {
-        if (!notes.length) {
+        if (!selectedFolderId || selectedFolderId === ALL_FOLDER || selectedFolderId === UNFILED_FOLDER) return;
+        if (foldersLoading) return;
+        if (!folders.some(folder => folder.id === selectedFolderId)) {
+            setSelectedFolderId(isDesktop ? ALL_FOLDER : null);
+            setSelectedNoteId(null);
+        }
+    }, [folders, foldersLoading, isDesktop, selectedFolderId]);
+
+    const filteredNotes = useMemo(() => {
+        if (!selectedFolderId || selectedFolderId === ALL_FOLDER) return notes;
+        if (selectedFolderId === UNFILED_FOLDER) return notes.filter(note => !note.folderId);
+        return notes.filter(note => note.folderId === selectedFolderId);
+    }, [notes, selectedFolderId]);
+
+    useEffect(() => {
+        if (selectedNoteId && !notes.some(note => note.id === selectedNoteId)) {
             setSelectedNoteId(null);
             return;
         }
 
-        const selectionExists = selectedNoteId && notes.some(note => note.id === selectedNoteId);
-        if (selectedNoteId && !selectionExists) {
-            setSelectedNoteId(null);
-            return;
+        if (!isDesktop || !selectedFolderId) return;
+        if (!selectedNoteId || !filteredNotes.some(note => note.id === selectedNoteId)) {
+            setSelectedNoteId(filteredNotes[0]?.id || null);
         }
+    }, [filteredNotes, isDesktop, notes, selectedFolderId, selectedNoteId]);
 
-        if (isDesktop && !selectedNoteId) {
-            setSelectedNoteId(notes[0].id);
-        }
-    }, [notes, selectedNoteId, isDesktop]);
+    const selectedFolderName = useMemo(() => {
+        if (selectedFolderId === ALL_FOLDER) return 'Tất cả ghi chú';
+        if (selectedFolderId === UNFILED_FOLDER) return 'Chưa phân loại';
+        return folders.find(folder => folder.id === selectedFolderId)?.name || 'Ghi chú';
+    }, [folders, selectedFolderId]);
+
+    const selectedNote = notes.find(note => note.id === selectedNoteId) || null;
+    const pendingDeleteNote = notes.find(note => note.id === pendingDeleteId) || null;
+    const combinedError = error || folderError;
+
+    const maskedKey = useMemo(() => {
+        if (!syncKey) return '';
+        if (syncKey.length <= 6) return `${syncKey.slice(0, 2)}***`;
+        return `${syncKey.slice(0, 3)}***${syncKey.slice(-2)}`;
+    }, [syncKey]);
+
+    const handleSelectFolder = useCallback((folderId) => {
+        setSelectedFolderId(folderId);
+        setSelectedNoteId(null);
+    }, []);
+
+    const handleBackToFolders = useCallback(() => {
+        setSelectedNoteId(null);
+        setSelectedFolderId(null);
+    }, []);
 
     const handleCreateNote = useCallback(async () => {
-        const newId = await createNote();
+        const folderId = selectedFolderId && ![ALL_FOLDER, UNFILED_FOLDER].includes(selectedFolderId)
+            ? selectedFolderId
+            : null;
+        const newId = await createNote('Ghi chú mới', '', folderId);
         if (newId) setSelectedNoteId(newId);
-    }, [createNote]);
+    }, [createNote, selectedFolderId]);
+
+    const handleMoveNoteFolder = useCallback(async (noteId, folderId) => {
+        const normalizedFolderId = folderId || null;
+        const ok = await updateNote(noteId, { folderId: normalizedFolderId });
+        if (ok && selectedFolderId !== ALL_FOLDER) {
+            setSelectedFolderId(normalizedFolderId || UNFILED_FOLDER);
+        }
+        return ok;
+    }, [selectedFolderId, updateNote]);
 
     const handleDeleteNote = useCallback((noteId) => {
         setPendingDeleteId(noteId);
@@ -72,6 +142,30 @@ export default function App() {
 
     const handleCancelDelete = useCallback(() => setPendingDeleteId(null), []);
 
+    const handleOpenCreateFolder = useCallback(() => {
+        setFolderDialog({ open: true, mode: 'create', folder: null });
+    }, []);
+
+    const handleOpenRenameFolder = useCallback((folder) => {
+        setFolderDialog({ open: true, mode: 'rename', folder });
+    }, []);
+
+    const handleCloseFolderDialog = useCallback(() => {
+        setFolderDialog(current => ({ ...current, open: false }));
+    }, []);
+
+    const handleSubmitFolder = useCallback(async (name) => {
+        if (folderDialog.mode === 'rename' && folderDialog.folder) {
+            return renameFolder(folderDialog.folder.id, name);
+        }
+
+        const folderId = await createFolder(name);
+        if (!folderId) return false;
+        setSelectedFolderId(folderId);
+        setSelectedNoteId(null);
+        return true;
+    }, [createFolder, folderDialog.folder, folderDialog.mode, renameFolder]);
+
     const handleSubmitSyncKey = useCallback((key) => {
         const trimmed = key.trim();
         if (!trimmed) return;
@@ -83,34 +177,38 @@ export default function App() {
     const handleOpenSyncModal = useCallback(() => setShowSyncModal(true), []);
     const handleCloseSyncModal = useCallback(() => setShowSyncModal(false), []);
 
-    const selectedNote = notes.find(note => note.id === selectedNoteId) || null;
-    const pendingDeleteNote = notes.find(note => note.id === pendingDeleteId) || null;
-    const maskedKey = useMemo(() => {
-        if (!syncKey) return '';
-        if (syncKey.length <= 6) return `${syncKey.slice(0, 2)}***`;
-        return `${syncKey.slice(0, 3)}***${syncKey.slice(-2)}`;
-    }, [syncKey]);
-
     return (
         <div className="min-h-screen bg-apple-bg-primary text-apple-text-primary">
             <div className="min-h-screen bg-gradient-to-b from-apple-bg-primary via-apple-bg-primary to-apple-bg-secondary">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-[var(--safe-area-top)] pb-[var(--safe-area-bottom)]">
-                    <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between py-4">
+                <div className="mx-auto max-w-[1400px] px-4 pb-[var(--safe-area-bottom)] pt-[var(--safe-area-top)] sm:px-6 lg:px-8">
+                    <header className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-apple-accent text-black flex items-center justify-center shadow-sm">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-apple-accent text-black shadow-sm">
                                 <span className="text-[15px] font-semibold">N</span>
                             </div>
                             <div>
                                 <h1 className="text-[18px] font-semibold">Notepad Online</h1>
-                                <p className="text-note-caption text-apple-text-secondary">
-                                    {syncKey ? `Sync Key: ${maskedKey}` : 'Chưa có Sync Key'}
-                                </p>
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-note-caption text-apple-text-secondary">
+                                    <span>{syncKey ? `Sync Key: ${maskedKey}` : 'Chưa có Sync Key'}</span>
+                                    <span aria-hidden="true">·</span>
+                                    <a
+                                        href={INSTAGRAM_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 font-medium text-apple-text-primary hover:text-apple-accent transition"
+                                        aria-label="Mở Instagram trunk.ng"
+                                    >
+                                        <Instagram size={14} />
+                                        @trunk.ng
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <button
+                                type="button"
                                 onClick={handleOpenSyncModal}
-                                className="flex min-h-11 items-center gap-2 px-4 py-2 rounded-full bg-apple-bg-secondary text-note-caption text-apple-text-primary hover:bg-apple-bg-tertiary active:scale-95 transition"
+                                className="flex min-h-11 items-center gap-2 rounded-full bg-apple-bg-secondary px-4 py-2 text-note-caption text-apple-text-primary hover:bg-apple-bg-tertiary active:scale-95 transition"
                             >
                                 <KeyRound size={16} />
                                 Sync Key
@@ -119,37 +217,58 @@ export default function App() {
                         </div>
                     </header>
 
-                    {error && (
-                        <div className="mb-4 rounded-xl border border-apple-danger bg-apple-bg-tertiary text-apple-danger px-4 py-3 text-note-caption">
-                            {error}
+                    {combinedError && (
+                        <div className="mb-4 rounded-xl border border-apple-danger bg-apple-bg-tertiary px-4 py-3 text-note-caption text-apple-danger">
+                            {combinedError}
                         </div>
                     )}
 
-                    <main className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
-                        <aside className={`${selectedNoteId ? 'hidden lg:block' : 'block'} h-[calc(100dvh-180px)] min-h-[420px] bg-apple-bg-secondary rounded-2xl p-3 shadow-sm lg:h-auto lg:min-h-0`}>
-                            <NoteList
+                    <main className="grid grid-cols-1 gap-4 lg:grid-cols-[220px_300px_minmax(0,1fr)]">
+                        <aside className={`${selectedFolderId ? 'hidden lg:block' : 'block'} h-[calc(100dvh-180px)] min-h-[420px] rounded-2xl bg-apple-bg-secondary p-3 shadow-sm`}>
+                            <FolderList
+                                folders={folders}
                                 notes={notes}
+                                loading={foldersLoading}
+                                selectedFolderId={selectedFolderId}
+                                onSelect={handleSelectFolder}
+                                onCreate={handleOpenCreateFolder}
+                                onRename={handleOpenRenameFolder}
+                            />
+                        </aside>
+
+                        <aside className={`${selectedFolderId && !selectedNoteId ? 'block' : 'hidden lg:block'} h-[calc(100dvh-180px)] min-h-[420px] rounded-2xl bg-apple-bg-secondary p-3 shadow-sm`}>
+                            <NoteList
+                                notes={filteredNotes}
                                 loading={loading}
                                 selectedId={selectedNoteId}
+                                title={selectedFolderName}
+                                onBack={handleBackToFolders}
                                 onSelect={setSelectedNoteId}
                                 onCreate={handleCreateNote}
                                 onDelete={handleDeleteNote}
                             />
                         </aside>
-                        <section className={`${selectedNoteId ? 'block' : 'hidden lg:block'} h-[calc(100dvh-180px)] min-h-[420px] bg-apple-bg-secondary rounded-2xl p-4 shadow-sm lg:h-auto lg:min-h-[60vh]`}>
-                            {loading ? (
-                                <div className="h-full flex items-center justify-center text-note-caption text-apple-text-secondary">
+
+                        <section className={`${selectedNoteId ? 'block' : 'hidden lg:block'} h-[calc(100dvh-180px)] min-h-[420px] rounded-2xl bg-apple-bg-secondary p-4 shadow-sm`}>
+                            {loading || foldersLoading ? (
+                                <div className="flex h-full items-center justify-center text-note-caption text-apple-text-secondary">
                                     Đang đồng bộ...
                                 </div>
-                            ) : notes.length === 0 ? (
+                            ) : filteredNotes.length === 0 ? (
                                 <EmptyState onCreate={handleCreateNote} />
-                            ) : (
+                            ) : selectedNote ? (
                                 <NoteEditor
                                     note={selectedNote}
+                                    folders={folders}
                                     onUpdate={updateNote}
+                                    onMoveFolder={handleMoveNoteFolder}
                                     onDelete={handleDeleteNote}
                                     onBack={() => setSelectedNoteId(null)}
                                 />
+                            ) : (
+                                <div className="flex h-full items-center justify-center text-note-caption text-apple-text-secondary">
+                                    Chọn một ghi chú để bắt đầu.
+                                </div>
                             )}
                         </section>
                     </main>
@@ -163,6 +282,14 @@ export default function App() {
                 onClose={handleCloseSyncModal}
                 canClose={Boolean(syncKey)}
                 noteCount={notes.length}
+            />
+
+            <FolderDialog
+                open={folderDialog.open}
+                mode={folderDialog.mode}
+                initialName={folderDialog.folder?.name || ''}
+                onClose={handleCloseFolderDialog}
+                onSubmit={handleSubmitFolder}
             />
 
             <ConfirmDialog

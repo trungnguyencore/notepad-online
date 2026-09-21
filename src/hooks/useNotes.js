@@ -77,13 +77,14 @@ export function useNotes(syncKey) {
     };
   }, [syncKey, setupListener]);
 
-  const createNote = useCallback(async (title = 'Ghi chú mới', content = '') => {
+  const createNote = useCallback(async (title = 'Ghi chú mới', content = '', folderId = null) => {
     if (!hashRef.current) return null;
     try {
       const notesRef = collection(db, 'sync_data', hashRef.current, 'notes');
       const docRef = await addDoc(notesRef, {
         title,
         content,
+        folderId: folderId || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });

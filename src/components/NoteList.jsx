@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2 } from 'lucide-react';
 
 function formatNoteDate(value) {
     if (!value) return '';
@@ -36,20 +36,33 @@ export default function NoteList({
     onSelect,
     onCreate,
     onDelete,
+    onBack,
+    title = 'Ghi chú',
     loading,
 }) {
     return (
         <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between px-1">
-                <div>
-                    <h2 className="text-note-title text-apple-text-primary">Ghi chú</h2>
+            <div className="flex items-center gap-2 px-1">
+                {onBack && (
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-apple-text-secondary hover:bg-apple-bg-tertiary active:scale-95 transition lg:hidden"
+                        aria-label="Quay lại danh sách thư mục"
+                    >
+                        <ChevronLeft size={22} />
+                    </button>
+                )}
+                <div className="min-w-0 flex-1">
+                    <h2 className="truncate text-note-title text-apple-text-primary">{title}</h2>
                     <p className="text-note-caption text-apple-text-secondary">
                         {loading ? 'Đang đồng bộ...' : `${notes.length} ghi chú`}
                     </p>
                 </div>
                 <button
+                    type="button"
                     onClick={onCreate}
-                    className="w-11 h-11 rounded-full bg-apple-accent text-black flex items-center justify-center hover:bg-apple-accent-hover active:scale-95 transition"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-apple-accent text-black hover:bg-apple-accent-hover active:scale-95 transition"
                     aria-label="Tạo ghi chú mới"
                 >
                     <Plus size={18} />

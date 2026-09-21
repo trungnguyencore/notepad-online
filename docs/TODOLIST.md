@@ -26,6 +26,8 @@
 
 ### 🔴 Ưu tiên Cao — Bản 1.1
 
+- [x] **Folder organization v1** — ✅ 2026-09-21: tạo/đổi tên folder, desktop 3-pane, mobile Folder→Notes→Editor, note có `folderId`, chuyển note giữa folder/Chưa phân loại, backward-compatible note cũ.
+- [x] **Instagram attribution** — ✅ Header có `@trunk.ng` link `https://www.instagram.com/trunk.ng/`, mở tab mới; browser test PASS.
 - [ ] **Toast Notifications** — Thông báo đẹp khi: mất kết nối Firestore, lưu thành công, lỗi CRUD. Dùng component tự build, animate slide-in từ bottom.
 - [x] **Confirm Dialog khi xóa** — ✅ Custom modal responsive, nút Hủy / Xóa tối thiểu 44px, Escape/backdrop cancel trên desktop.
 - [ ] **Tìm kiếm ghi chú** — Thanh search trong `NoteList`, lọc real-time theo tiêu đề và nội dung. Highlight từ khóa khớp.
@@ -37,6 +39,7 @@
 
 ### 🟡 Ưu tiên Trung bình — Bản 1.2
 
+- [ ] **Xóa folder an toàn** — Nếu bổ sung, chỉ xóa folder metadata và chuyển notes bên trong về `Chưa phân loại`; không cascade-delete note.
 - [ ] **Ghim ghi chú (Pin)** — Ghim ghi chú quan trọng lên đầu danh sách, lưu cờ `pinned: boolean` vào Firestore, hiển thị icon 📌.
 - [ ] **Sắp xếp notes** — Dropdown sắp xếp: Mới nhất trước, Cũ nhất trước, Tên A-Z, Tên Z-A.
 - [ ] **Word/Character count** — Hiển thị số từ + số ký tự ở footer editor, cập nhật real-time.
