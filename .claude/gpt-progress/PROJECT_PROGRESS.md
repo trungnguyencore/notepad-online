@@ -2,7 +2,7 @@
 
 - Last verified: 2026-10-01
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: Checklist/Task list đã local verified; production vẫn là folder v1, checklist chưa commit/push/deploy.
+- Current phase: Checklist/Task list đã deploy production và desktop/mobile production smoke PASS.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
@@ -50,7 +50,13 @@
 - Mobile 393×852: Checklist button 44×44, task-list markup present, overflowX=0, nested button=0, console clean.
 - Checked task line-through verified by computed style.
 - 5 isolated checklist test workspaces cleaned; direct Firestore verification = 0 docs each.
-- Working tree contains checklist code/docs changes; not committed/pushed/deployed.
+- Checklist feature commit `822c80b29be0e622fd229b6769ec0613e43284c8` đã push lên `main`.
+
+## Production checklist rollout verified 2026-10-01
+- Vercel deployment `notepad-online-fyoy7lzt2-trunknguen.vercel.app` Ready; created 2026-10-01 22:33:38 +07:00; production alias updated.
+- Desktop production smoke: `[false,false] → [true,false] → reload [true,false]`; toolbar 44×44; checked item line-through; console clean.
+- Mobile 393×852 production smoke: cold `[true,false]`; task markup present; second check `[true,true]`; reload `[true,true]`; toolbar 44×44; overflowX=0; nested=0; console clean.
+- Test note cleanup via production UI PASS; `cleanupCards=0` on isolated Sync Key.
 
 ## Not verified yet
 - Firestore Rules hardening beyond current Sync-Key trust model remains open.
@@ -58,9 +64,8 @@
 - Không có test/lint script canonical trong `package.json`.
 
 ## Next actions
-1. If user requests deploy: review/stage checklist diff, commit/push `main`, wait Vercel Ready, run production checklist smoke.
-2. User acceptance checklist on real iPhone after deploy.
-3. Continue bundle optimization + Firestore Rules hardening.
-4. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
+1. User acceptance checklist on real iPhone.
+2. Continue bundle optimization + Firestore Rules hardening.
+3. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
 
 > Nếu mâu thuẫn, `docs\PROJECT_PROGRESS.md` và source/Git evidence mới hơn thắng.

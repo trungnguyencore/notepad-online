@@ -19,7 +19,8 @@
 - Baseline before folder feature: local/remote HEAD `1f88301e68fbe5f619a5ab1be09d85b26d3c310e`.
 - Folder/Instagram rollout commit: `d9165d0c8c9248df3cfaf2ee5e035650f2b09de8`, pushed to `main`.
 - Baseline at checklist start: local/remote `main` = `ef2c3ed7ad0e2bf8e6f08f0558ac774fc65c9ae8`.
-- Checklist implementation currently uncommitted; `.env` remains ignored and was not read/staged.
+- Checklist rollout feature commit: `822c80b29be0e622fd229b6769ec0613e43284c8`, pushed to `main`.
+- `.env` remains ignored and was not read/staged.
 
 ## Runtime/mobile evidence — 2026-09-21
 - Pre-change backup verified 91/91 files (excluding `node_modules`/`dist`) tại `D:\OTHERS\LATVAT\notepad app online_backup_2026-09-21_pre_mobile`.
@@ -61,7 +62,10 @@
 - Mobile 393×852 cold-start: Checklist toolbar 44×44, `ul[data-type=taskList]` present, overflowX=0, nestedButtons=0, console=[] .
 - Checked item computed style includes `text-decoration-line: line-through`.
 - Cleanup verification across 5 isolated checklist Sync Keys: all collections returned 0 documents.
-- Production checklist deployment not performed yet.
+- Production checklist rollout: feature commit `822c80b` → Vercel deployment `https://notepad-online-fyoy7lzt2-trunknguen.vercel.app`, status Ready, created 2026-10-01 22:33:38 +07:00; alias `https://notepad-online-beta.vercel.app` updated.
+- Production desktop smoke: create two task items `[false,false]`, first check `[true,false]`, reload `[true,false]`, toolbar 44×44, line-through verified, console=[] .
+- Production mobile 393×852 smoke: cold `[true,false]`, task-list markup present, second check `[true,true]`, reload `[true,true]`, toolbar 44×44, overflowX=0, nestedButtons=0, console=[] .
+- Production isolated test note deleted through UI; final note-card count = 0.
 
 ## Still unverified
 - Firestore rule hardening beyond current Sync-Key model and PWA offline behavior remain open.

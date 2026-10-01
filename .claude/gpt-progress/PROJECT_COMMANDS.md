@@ -22,6 +22,6 @@ Không tự invent test/lint command rồi ghi là canonical.
 `firebase.json` trỏ rules source tới `firestore.rules`.
 
 ## Deployment
-GitHub `main` → Vercel auto-deploy đã verify ở production trước folder feature.
+GitHub `main` → Vercel auto-deploy đã verify qua mobile, folder và checklist production rollouts.
 Current production alias: `https://notepad-online-beta.vercel.app`.
-Không commit/push/deploy checklist hoặc feature UI mới nếu user chưa yêu cầu rõ.
+Không commit/push/deploy feature UI mới nếu user chưa yêu cầu rõ.

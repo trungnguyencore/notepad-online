@@ -2,7 +2,7 @@
 
 - **Last verified:** 2026-10-01
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** production folder v1 vẫn live; Checklist/Task list kiểu Apple Notes đã implement + local regression PASS, hiện chưa commit/push/deploy.
+- **Status:** Checklist/Task list kiểu Apple Notes đã push GitHub, Vercel production Ready và desktop/mobile production smoke PASS.
 - **Backlog:** `docs\TODOLIST.md`
 - **AI rules:** `.claude\CLAUDE.md`
 
@@ -49,8 +49,8 @@ notepad app online/
 ## 3. Git state at verification
 
 - Branch: `main`, remote `https://github.com/trungnguyencore/notepad-online.git`.
-- Verified committed baseline trước checklist: `ef2c3ed7ad0e2bf8e6f08f0558ac774fc65c9ae8` (`docs: add project README`), local = `origin/main` lúc bắt đầu task.
-- Checklist implementation hiện là working-tree changes chưa commit/push.
+- Baseline trước checklist: `ef2c3ed7ad0e2bf8e6f08f0558ac774fc65c9ae8` (`docs: add project README`).
+- Checklist feature commit đã push `main`: `822c80b29be0e622fd229b6769ec0613e43284c8` (`feat: add checklist task lists`).
 - `.env` vẫn ignored/untracked; task checklist không đọc hoặc stage `.env`.
 
 ## 4. Verification status
@@ -116,20 +116,23 @@ notepad app online/
 - Checked task computed `text-decoration-line = line-through`.
 - Final build after version alignment: PASS, 1705 modules; JS 818.31 kB minified / 232.39 kB gzip; Vite chunk >500 kB warning remains.
 - 5 isolated checklist Sync Keys đã cleanup; direct Firestore verification = 0 documents cho cả 5 test workspaces.
-- Checklist code hiện local-only; production `https://notepad-online-beta.vercel.app` chưa chứa feature này.
+- Checklist feature commit `822c80b` đã push lên GitHub `main` và Vercel auto-deploy production PASS.
+- Feature deployment: `https://notepad-online-fyoy7lzt2-trunknguen.vercel.app`, status `Ready`, created 2026-10-01 22:33:38 +07:00; alias `https://notepad-online-beta.vercel.app` trỏ vào deployment này tại thời điểm production smoke.
+- Production desktop smoke PASS: tạo 2 checklist item `[false,false]`, check item đầu `[true,false]`, refresh vẫn `[true,false]`, toolbar 44×44, checked text line-through, console=[] .
+- Production mobile 393×852 smoke PASS: cold state `[true,false]`, task markup present, check item hai → `[true,true]`, reload vẫn `[true,true]`, toolbar 44×44, overflowX=0, nestedButtons=0, console=[] .
+- Production test note cleanup qua UI PASS; `cleanupCards=0` trên isolated Sync Key.
 
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
-Checklist v1 đã local verified nhưng chưa deploy. Production folder v1 vẫn ổn; bundle/code-splitting và Firestore Rules hardening vẫn còn.
+Checklist v1 đã deploy production và desktop/mobile smoke PASS. Bundle/code-splitting và Firestore Rules hardening vẫn còn.
 
 ## 7. Next actions
 
-1. Khi user yêu cầu deploy: review/stage checklist diff → commit/push `main` → chờ Vercel Ready → production checklist smoke desktop/mobile.
-2. User acceptance checklist trên iPhone thật sau deploy.
-3. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
-4. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
-5. Tiếp tục backlog feature (toast/search/shortcuts...).
+1. User acceptance checklist trên iPhone thật.
+2. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
+3. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
+4. Tiếp tục backlog feature (toast/search/shortcuts...).
 
 ## 8. Archive rule
 
@@ -146,4 +149,5 @@ Mọi công việc Notepad mặc định phải thực hiện ở project hiện
 - 2026-09-21: Commit `fba947a` push lên `trungnguyencore/notepad-online`; Vercel Git integration auto-deploy production PASS; production alias `notepad-online-beta.vercel.app` mobile smoke + isolated CRUD cleanup PASS.
 - 2026-09-21: Tạo backup pre-folders, implement folder create/rename + note folder assignment + desktop 3-pane/mobile 3-step + `@trunk.ng` Instagram attribution; deploy Firestore folder rules; desktop/mobile regression PASS.
 - 2026-09-21: Push commit `d9165d0` lên `main`; Vercel auto-deploy folder UI Ready; production alias `notepad-online-beta.vercel.app` smoke PASS cho create/rename folder, folder-scoped note, move-to-Unfiled và Instagram attribution; test workspace cleanup PASS.
-- 2026-10-01: Tạo backup pre-checklist; thêm TipTap TaskList/TaskItem + toolbar Checklist + checked styling; build PASS; normal save/reload + fast switch/back + mobile cold-start regressions PASS; 5/5 test workspaces cleanup về 0. Chưa push/deploy checklist.
+- 2026-10-01: Tạo backup pre-checklist; thêm TipTap TaskList/TaskItem + toolbar Checklist + checked styling; build PASS; normal save/reload + fast switch/back + mobile cold-start regressions PASS; 5/5 test workspaces cleanup về 0.
+- 2026-10-01: Push feature commit `822c80b`; Vercel deployment `notepad-online-fyoy7lzt2-trunknguen.vercel.app` Ready; production desktop/mobile checklist smoke PASS, test note cleanup=0.

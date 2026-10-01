@@ -26,7 +26,7 @@
 - Notes: `sync_data/{hash}/notes/{noteId}`; folder organization dùng `folderId` nullable để giữ backward compatibility.
 - Folders: `sync_data/{hash}/folders/{folderId}`; create/read/update rules đã deploy, delete deny trong v1.
 - Desktop folder UI = 3 pane; mobile = Folders → Notes → Editor.
-- Vercel config có trong `vercel.json`; production alias `https://notepad-online-beta.vercel.app` hiện chạy folder UI v1. Checklist 2026-10-01 mới local verified, chưa deploy.
+- Vercel config có trong `vercel.json`; production alias `https://notepad-online-beta.vercel.app` hiện đã chạy Checklist/Task list sau feature commit `822c80b`.
 
 ## Critical rules
 Không đọc `.env` nếu task không cần.
