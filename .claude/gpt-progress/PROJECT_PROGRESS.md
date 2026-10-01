@@ -1,13 +1,14 @@
 # PROJECT PROGRESS — GPT RESUME
 
-- Last verified: 2026-09-21
+- Last verified: 2026-10-01
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: Folder organization v1 + `@trunk.ng` attribution deployed to production and production smoke PASS.
+- Current phase: Checklist/Task list đã local verified; production vẫn là folder v1, checklist chưa commit/push/deploy.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
 - `useNotes.js` có Firestore real-time listener, CRUD helpers và nullable `folderId`.
 - `useFolders.js` có realtime folder listener + create/rename helpers.
+- `NoteEditor.jsx` dùng TipTap TaskList/TaskItem cho checklist; checked state nằm trong note HTML nên không đổi Firestore schema.
 - Sync Key được hash SHA-256 trong `useNotes.js`.
 - Firebase config được lấy từ biến `VITE_FIREBASE_*` trong `src\lib\firebase.js`.
 - `package.json` có ba script: `dev`, `build`, `preview`.
@@ -40,14 +41,26 @@
 - Production mobile smoke 393×852 PASS: folder create/rename, note-in-folder, persistence, move to Unfiled, `@trunk.ng` link, overflowX=0, nested=0, no visible button <44px, console clean.
 - Production smoke workspace cleanup PASS via Firebase CLI recursive delete.
 
+## Checklist local verified 2026-10-01
+- Backup pre-checklist verified 175/175 files excluding `node_modules`/`dist`, HEAD `ef2c3ed`.
+- TipTap runtime-aligned packages: TaskList/TaskItem/React/StarterKit = 2.27.2.
+- Final build PASS: 1705 modules; JS 818.31 kB / 232.39 kB gzip; chunk >500 kB warning remains.
+- Normal checklist persistence PASS: 2 items via Enter; first/second checkbox states survive independent reloads.
+- Fast switch/back pending-draft path verified: after waiting for Firestore commit, backend and cold-start UI preserve `[unchecked, checked]` state.
+- Mobile 393×852: Checklist button 44×44, task-list markup present, overflowX=0, nested button=0, console clean.
+- Checked task line-through verified by computed style.
+- 5 isolated checklist test workspaces cleaned; direct Firestore verification = 0 docs each.
+- Working tree contains checklist code/docs changes; not committed/pushed/deployed.
+
 ## Not verified yet
 - Firestore Rules hardening beyond current Sync-Key trust model remains open.
 - PWA/offline behavior remains open.
 - Không có test/lint script canonical trong `package.json`.
 
 ## Next actions
-1. User acceptance on real device for folder workflow.
-2. Continue bundle optimization + Firestore Rules hardening.
-3. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
+1. If user requests deploy: review/stage checklist diff, commit/push `main`, wait Vercel Ready, run production checklist smoke.
+2. User acceptance checklist on real iPhone after deploy.
+3. Continue bundle optimization + Firestore Rules hardening.
+4. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
 
 > Nếu mâu thuẫn, `docs\PROJECT_PROGRESS.md` và source/Git evidence mới hơn thắng.

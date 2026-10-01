@@ -1,8 +1,8 @@
 # PROJECT PROGRESS — Notepad Online
 
-- **Last verified:** 2026-09-21
+- **Last verified:** 2026-10-01
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** folder organization v1 + Instagram attribution đã push GitHub, auto-deploy Vercel production và production smoke PASS.
+- **Status:** production folder v1 vẫn live; Checklist/Task list kiểu Apple Notes đã implement + local regression PASS, hiện chưa commit/push/deploy.
 - **Backlog:** `docs\TODOLIST.md`
 - **AI rules:** `.claude\CLAUDE.md`
 
@@ -39,7 +39,7 @@ notepad app online/
 - `src\hooks\useFolders.js` có realtime folders + create/rename trên `sync_data/{hash}/folders`.
 - `src\hooks\useTheme.js` quản lý theme persistence.
 - `src\components\FolderList.jsx`, `FolderDialog.jsx`, `FolderPicker.jsx` cung cấp folder navigation/create/rename/move-note UI.
-- `src\components\NoteEditor.jsx` có editor, autosave debounce và folder picker.
+- `src\components\NoteEditor.jsx` có editor, autosave debounce, folder picker và Checklist/Task list bằng TipTap `TaskList` + `TaskItem`.
 - `src\components\NoteList.jsx` có danh sách, create/select/delete UI và mobile back-to-folders navigation.
 - `src\components\SyncKeyModal.jsx` có luồng nhập Sync Key.
 - Header có attribution `@trunk.ng` link tới `https://www.instagram.com/trunk.ng/`.
@@ -49,9 +49,9 @@ notepad app online/
 ## 3. Git state at verification
 
 - Branch: `main`, remote `https://github.com/trungnguyencore/notepad-online.git`.
-- Folder feature commit đã push lên `main`: `d9165d0c8c9248df3cfaf2ee5e035650f2b09de8` (`feat: add note folders and attribution`).
-- GitHub remote: `https://github.com/trungnguyencore/notepad-online.git`.
-- `.env` vẫn ignored/untracked; không được đọc hoặc stage trong task này.
+- Verified committed baseline trước checklist: `ef2c3ed7ad0e2bf8e6f08f0558ac774fc65c9ae8` (`docs: add project README`), local = `origin/main` lúc bắt đầu task.
+- Checklist implementation hiện là working-tree changes chưa commit/push.
+- `.env` vẫn ignored/untracked; task checklist không đọc hoặc stage `.env`.
 
 ## 4. Verification status
 
@@ -62,6 +62,7 @@ notepad app online/
 - Existing note CRUD isolated-key acceptance: create → autosave → refresh persistence → delete cleanup PASS.
 - Chưa xác minh PWA/offline behavior.
 - Không có `test` hoặc `lint` script trong `package.json` hiện tại.
+- `npm install` trong task checklist báo 50 dependency audit findings (2 low, 39 moderate, 8 high, 1 critical); không chạy `npm audit fix` vì ngoài scope và có thể đổi dependency rộng.
 ## 5. Mobile/runtime stabilization — 2026-09-21
 
 - Backup pre-mobile: `D:\OTHERS\LATVAT\notepad app online_backup_2026-09-21_pre_mobile` (91/91 files so với source excluding `node_modules`/`dist`; giữ `.git`, `.env`, source/config/docs).
@@ -102,17 +103,33 @@ notepad app online/
 - Production mobile smoke 393×852 PASS: `@trunk.ng` link đúng; folder home hiện; create folder PASS; rename PASS; note tạo trong folder nhận đúng picker; nội dung persist; move về `Chưa phân loại` PASS; overflowX=0; nested button=0; visible small button count=0; note cleanup=0; console=[] .
 - Production test workspace đã cleanup bằng Firebase CLI recursive delete, exit code 0.
 
+## 5C. Checklist / Task list implementation — 2026-10-01
+
+- Backup pre-checklist: `D:\OTHERS\LATVAT\notepad app online_backup_2026-10-01_pre_checklist`; verified 175/175 files excluding `node_modules`/`dist`, Git HEAD `ef2c3ed`.
+- Added exact runtime-aligned dependencies `@tiptap/extension-task-list@2.27.2` và `@tiptap/extension-task-item@2.27.2`; `npm ls` confirms React/StarterKit/TaskList/TaskItem cùng TipTap 2.27.2 line.
+- Editor toolbar có nút `Checklist` 44×44 dùng icon `ListChecks`; command `toggleTaskList()`; Enter tạo task item tiếp theo.
+- Task item render checkbox native; checked item dùng text secondary + line-through; nested task list được enable.
+- Không đổi Firestore schema/rules: checklist được serialize trực tiếp trong `note.content` HTML với `data-type="taskList"`, `data-type="taskItem"`, `data-checked` và sync qua autosave hiện có.
+- Normal-save regression: `[false,false] → first click → reload [true,false] → second click → reload [true,true]`, console sạch.
+- Fast-switch/back regression: checkbox change trước debounce vẫn đi qua pending-draft flush; direct Firestore verification sau commit delay xác nhận đúng `1 checked / 1 unchecked`; cold-start mobile render lại `[false,true]` đúng backend.
+- Mobile 393×852 cold-start: Checklist toolbar 44×44, task-list markup present, overflowX=0, nested buttons=0, console=[] .
+- Checked task computed `text-decoration-line = line-through`.
+- Final build after version alignment: PASS, 1705 modules; JS 818.31 kB minified / 232.39 kB gzip; Vite chunk >500 kB warning remains.
+- 5 isolated checklist Sync Keys đã cleanup; direct Firestore verification = 0 documents cho cả 5 test workspaces.
+- Checklist code hiện local-only; production `https://notepad-online-beta.vercel.app` chưa chứa feature này.
+
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
-Folder organization v1 đã deploy production và smoke PASS. Việc còn lại: user acceptance trên thiết bị thật, bundle/code-splitting, Firestore Rules hardening và feature backlog tiếp theo.
+Checklist v1 đã local verified nhưng chưa deploy. Production folder v1 vẫn ổn; bundle/code-splitting và Firestore Rules hardening vẫn còn.
 
 ## 7. Next actions
 
-1. User test folder workflow trên production/iPhone thật.
-2. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
-3. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
-4. Tiếp tục backlog feature (toast/search/shortcuts...) sau folder rollout.
+1. Khi user yêu cầu deploy: review/stage checklist diff → commit/push `main` → chờ Vercel Ready → production checklist smoke desktop/mobile.
+2. User acceptance checklist trên iPhone thật sau deploy.
+3. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
+4. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
+5. Tiếp tục backlog feature (toast/search/shortcuts...).
 
 ## 8. Archive rule
 
@@ -129,3 +146,4 @@ Mọi công việc Notepad mặc định phải thực hiện ở project hiện
 - 2026-09-21: Commit `fba947a` push lên `trungnguyencore/notepad-online`; Vercel Git integration auto-deploy production PASS; production alias `notepad-online-beta.vercel.app` mobile smoke + isolated CRUD cleanup PASS.
 - 2026-09-21: Tạo backup pre-folders, implement folder create/rename + note folder assignment + desktop 3-pane/mobile 3-step + `@trunk.ng` Instagram attribution; deploy Firestore folder rules; desktop/mobile regression PASS.
 - 2026-09-21: Push commit `d9165d0` lên `main`; Vercel auto-deploy folder UI Ready; production alias `notepad-online-beta.vercel.app` smoke PASS cho create/rename folder, folder-scoped note, move-to-Unfiled và Instagram attribution; test workspace cleanup PASS.
+- 2026-10-01: Tạo backup pre-checklist; thêm TipTap TaskList/TaskItem + toolbar Checklist + checked styling; build PASS; normal save/reload + fast switch/back + mobile cold-start regressions PASS; 5/5 test workspaces cleanup về 0. Chưa push/deploy checklist.

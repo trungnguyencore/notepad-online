@@ -1,6 +1,6 @@
 # PROJECT EVIDENCE — Notepad Online
 
-- Last verified: 2026-09-21
+- Last verified: 2026-10-01
 - Canonical progress: `docs\PROJECT_PROGRESS.md`
 
 ## Verified source evidence
@@ -8,7 +8,7 @@
 - `src\hooks\useNotes.js`: SHA-256 Sync Key, Firestore listener, CRUD helpers và nullable `folderId`.
 - `src\hooks\useFolders.js`: Firestore realtime folders + create/rename.
 - `src\components\FolderList.jsx`, `FolderDialog.jsx`, `FolderPicker.jsx`: folder navigation/create/rename/note assignment UI.
-- `src\components\NoteEditor.jsx`: TipTap editor + autosave + folder picker.
+- `src\components\NoteEditor.jsx`: TipTap editor + autosave + folder picker + TaskList/TaskItem checklist toolbar command.
 - `src\components\NoteList.jsx`: note list/create/delete + mobile back-to-folders navigation.
 - `src\components\SyncKeyModal.jsx`: Sync Key input flow.
 - `src\lib\firebase.js`: Firebase init từ `VITE_FIREBASE_*`.
@@ -18,7 +18,8 @@
 - Branch local: `main`; remote `https://github.com/trungnguyencore/notepad-online.git`.
 - Baseline before folder feature: local/remote HEAD `1f88301e68fbe5f619a5ab1be09d85b26d3c310e`.
 - Folder/Instagram rollout commit: `d9165d0c8c9248df3cfaf2ee5e035650f2b09de8`, pushed to `main`.
-- `.env` remains ignored and was not read/staged.
+- Baseline at checklist start: local/remote `main` = `ef2c3ed7ad0e2bf8e6f08f0558ac774fc65c9ae8`.
+- Checklist implementation currently uncommitted; `.env` remains ignored and was not read/staged.
 
 ## Runtime/mobile evidence — 2026-09-21
 - Pre-change backup verified 91/91 files (excluding `node_modules`/`dist`) tại `D:\OTHERS\LATVAT\notepad app online_backup_2026-09-21_pre_mobile`.
@@ -50,6 +51,17 @@
 - Vercel deployment `https://notepad-online-k9ioc8h0z-trunknguen.vercel.app`, status Ready, created 2026-09-21 14:35:21 +07:00; alias `https://notepad-online-beta.vercel.app` points to it.
 - Production Selenium mobile smoke 393×852: Instagram text/href/target correct; foldersHome=true; folderCreated=true; rename=true; persistedContent=true; pickerAfterMove=`Chưa phân loại`; overflowX=0; nested=0; small=0; noteCleanupRemaining=0; console=[] .
 - Production test Sync Key root cleanup via Firebase CLI recursive delete completed with exit code 0.
+
+## Checklist evidence — 2026-10-01
+- Pre-checklist backup `D:\OTHERS\LATVAT\notepad app online_backup_2026-10-01_pre_checklist`: 175/175 files excluding `node_modules`/`dist`; Git HEAD `ef2c3ed`.
+- `npm ls` confirms `@tiptap/react`, `starter-kit`, `extension-task-list`, `extension-task-item` all at 2.27.2.
+- Final `npm run build`: PASS, 1705 modules; JS 818.31 kB minified / 232.39 kB gzip.
+- Browser saveprobe: typed two checklist items `[false,false]`; reload after first click `[true,false]`; reload after second click `[true,true]`; console clean.
+- Fast-back test: UI changed `[true,true] → [false,true]`; after allowing Firestore commit, direct backend read = 1 true / 1 false; independent mobile cold-start rendered `[false,true]`.
+- Mobile 393×852 cold-start: Checklist toolbar 44×44, `ul[data-type=taskList]` present, overflowX=0, nestedButtons=0, console=[] .
+- Checked item computed style includes `text-decoration-line: line-through`.
+- Cleanup verification across 5 isolated checklist Sync Keys: all collections returned 0 documents.
+- Production checklist deployment not performed yet.
 
 ## Still unverified
 - Firestore rule hardening beyond current Sync-Key model and PWA offline behavior remain open.

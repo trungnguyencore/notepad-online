@@ -65,6 +65,47 @@ body {
 .ProseMirror p  { margin-bottom: 4px; }
 .ProseMirror ul, .ProseMirror ol { padding-left: 24px; margin-bottom: 8px; }
 .ProseMirror li { margin-bottom: 2px; }
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+  margin: 8px 0;
+}
+.ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.ProseMirror ul[data-type="taskList"] li > label {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 24px;
+  user-select: none;
+}
+.ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  cursor: pointer;
+  accent-color: var(--color-accent);
+}
+.ProseMirror ul[data-type="taskList"] li > div {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.ProseMirror ul[data-type="taskList"] li > div > p {
+  margin: 0;
+}
+.ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div {
+  color: var(--color-text-secondary);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.ProseMirror ul[data-type="taskList"] ul[data-type="taskList"] {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
 .ProseMirror blockquote {
   border-left: 3px solid var(--color-accent);
   padding-left: 16px;

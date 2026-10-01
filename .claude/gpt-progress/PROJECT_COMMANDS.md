@@ -1,6 +1,6 @@
 # PROJECT COMMANDS — Notepad Online
 
-- Last verified: 2026-09-21
+- Last verified: 2026-10-01
 - Source: `package.json` + verified Firebase deployment flow.
 
 ## Canonical npm scripts
@@ -24,4 +24,4 @@ Không tự invent test/lint command rồi ghi là canonical.
 ## Deployment
 GitHub `main` → Vercel auto-deploy đã verify ở production trước folder feature.
 Current production alias: `https://notepad-online-beta.vercel.app`.
-Không commit/push/deploy UI folder nếu user chưa yêu cầu rõ.
+Không commit/push/deploy checklist hoặc feature UI mới nếu user chưa yêu cầu rõ.

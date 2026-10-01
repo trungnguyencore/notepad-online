@@ -3,7 +3,9 @@ import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Bold, ChevronLeft, Italic, List, ListOrdered, Quote, Trash2, Underline as UnderlineIcon } from 'lucide-react';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
+import { Bold, ChevronLeft, Italic, List, ListChecks, ListOrdered, Quote, Trash2, Underline as UnderlineIcon } from 'lucide-react';
 import FolderPicker from './FolderPicker';
 
 const SAVE_DELAY = 450;
@@ -58,6 +60,10 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                     heading: { levels: [1, 2, 3] },
                 }),
                 Underline,
+                TaskList,
+                TaskItem.configure({
+                    nested: true,
+                }),
                 Placeholder.configure({
                     placeholder: 'Bắt đầu viết...'
                 }),
@@ -238,6 +244,13 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                         onClick={() => editor?.chain().focus().toggleOrderedList().run()}
                     >
                         <ListOrdered size={16} />
+                    </ToolbarButton>
+                    <ToolbarButton
+                        label="Checklist"
+                        active={editor?.isActive('taskList')}
+                        onClick={() => editor?.chain().focus().toggleTaskList().run()}
+                    >
+                        <ListChecks size={17} />
                     </ToolbarButton>
                     <ToolbarButton
                         label="Quote"

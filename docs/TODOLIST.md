@@ -1,6 +1,6 @@
 # 📋 TODO List — Notepad App Online
 
-> **Cập nhật:** 2026-09-21 | **Phiên bản hiện tại:** 1.0.0
+> **Cập nhật:** 2026-10-01 | **Phiên bản hiện tại:** 1.0.0
 
 ---
 
@@ -15,7 +15,7 @@
 - [x] **P1 — Touch targets quá nhỏ trên iPhone** — ✅ 2026-09-21: visible interactive controls regression không còn target <44px; editor toolbar 44×44.
 - [x] **P1 — Sync Key input 15px** — ✅ 2026-09-21: computed font-size = 16px ở 393×852 và 430×932.
 - [x] **P1 — Nested interactive control** — ✅ 2026-09-21: note card và delete là sibling controls; DOM regression `button button = 0`.
-- [ ] **P2 — Bundle lớn** — build 2026-09-21: JS 799.26 kB minified / 227.29 kB gzip, Vite warning chunk >500 kB; cân nhắc code-splitting.
+- [ ] **P2 — Bundle lớn** — build 2026-10-01 sau checklist: JS 818.31 kB minified / 232.39 kB gzip, Vite warning chunk >500 kB; cân nhắc code-splitting.
 - [x] **P2 — PWA meta warning** — ✅ 2026-09-21: thêm `mobile-web-app-capable=yes`; browser console regression sạch.
 - [x] **Thiếu PWA icons chuẩn** — `manifest.json` chỉ reference `favicon.svg` với `sizes: "any"`. Cần icon 192x192 và 512x512 PNG cho PWA. ✅ Đã thêm đầy đủ
 - [x] **Thiếu meta tags social sharing** — Không có `og:image`, `og:title`, `twitter:card` cho preview khi share link. ✅ Đã thêm Open Graph + Twitter Card
@@ -28,6 +28,7 @@
 
 - [x] **Folder organization v1** — ✅ 2026-09-21: tạo/đổi tên folder, desktop 3-pane, mobile Folder→Notes→Editor, note có `folderId`, chuyển note giữa folder/Chưa phân loại, backward-compatible note cũ.
 - [x] **Instagram attribution** — ✅ Header có `@trunk.ng` link `https://www.instagram.com/trunk.ng/`, mở tab mới; browser test PASS.
+- [x] **Checklist / Task list kiểu Apple Notes** — ✅ 2026-10-01: toolbar Checklist 44×44, Enter tạo item mới, click checkbox giữ `checked` qua autosave/Firestore, checked text line-through; desktop/mobile + fast-switch/back regression PASS local. Chưa deploy production.
 - [ ] **Toast Notifications** — Thông báo đẹp khi: mất kết nối Firestore, lưu thành công, lỗi CRUD. Dùng component tự build, animate slide-in từ bottom.
 - [x] **Confirm Dialog khi xóa** — ✅ Custom modal responsive, nút Hủy / Xóa tối thiểu 44px, Escape/backdrop cancel trên desktop.
 - [ ] **Tìm kiếm ghi chú** — Thanh search trong `NoteList`, lọc real-time theo tiêu đề và nội dung. Highlight từ khóa khớp.
@@ -74,7 +75,7 @@
 ## 📝 Ghi chú
 
 - **Lợi thế cạnh tranh:** Không cần đăng nhập + bảo mật bằng Sync Key (SHA-256)
-- **Tech stack:** React 18 + Vite 6 + Tailwind CSS 3.4 + TipTap 2.9 + Firebase Firestore
+- **Tech stack:** React 18 + Vite 6 + Tailwind CSS 3.4 + TipTap runtime 2.27.2 + Firebase Firestore
 - **Deploy:** Vercel (SPA), auto-deploy từ GitHub push
 
 ---
