@@ -2,7 +2,7 @@
 
 - **Last verified:** 2026-10-03
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** Compact editor header + branding logo A đã rollout production PASS. Logo feature commit `2cf812b` thay vòng tròn `N` bằng `public/notepad-logo.svg`; Vercel deployment `notepad-online-6950taq52-trunknguen.vercel.app` Ready và production alias render logo 40×40 đúng, no overflow. Checklist/folder/header flows trước đó vẫn production PASS.
+- **Status:** Pin + Sort + Recent notes đã rollout production PASS. Feature commit `8ca3b92` đã push `main`; Vercel deployment `notepad-online-dqukqqd8l-trunknguen.vercel.app` Ready; production alias phục vụ đúng bundle `assets/index-BqJz-Nup.js`. Desktop + iPhone 393×852 smoke PASS, pin/recent persist qua Firestore/reload, sort preference persist local, isolated test cleanup=0.
 - **Backlog:** `docs\TODOLIST.md`
 - **AI rules:** `.claude\CLAUDE.md`
 
@@ -155,17 +155,33 @@ notepad app online/
 - Production alias `https://notepad-online-beta.vercel.app` Selenium readback: logo complete=true, natural 150×150, rendered 40×40, page overflow=false.
 - Không đổi Firestore, Sync Key, note/editor/folder behavior hoặc archive/backups.
 
+## 5G. Pin + Sort + Recent notes — 2026-10-03
+
+- Added backward-compatible note metadata: `pinned` (missing = false) và `lastOpenedAt` (missing = null); không cần Firestore rules/schema migration vì current note rules cho phép update field.
+- Pin/unpin dùng write riêng, **không** touch `updatedAt`, nên thao tác ghim không làm sai thứ tự `Mới sửa`.
+- Explicit note open cập nhật `lastOpenedAt` riêng; virtual system folder `Gần đây` hiển thị tối đa 10 note mở gần nhất và sync được giữa iPhone/laptop qua Firestore.
+- Sort trong các list thường: `Mới sửa`, `Cũ nhất`, `A–Z`; pinned notes luôn đứng trước rồi mới áp sort trong từng nhóm. Sort preference lưu localStorage key `notepad-note-sort`.
+- Recent view giữ thứ tự `lastOpenedAt` thay vì sort/pin priority để đúng semantics gần đây.
+- Note card có Pin + Delete là sibling controls; pin/delete touch targets >=44px và DOM `button button = 0`.
+- Final local build PASS: 1705 modules; JS 822.27 kB / 233.44 kB gzip; existing Vite chunk >500 kB warning remains.
+- Local desktop regression với 4 isolated notes: pin Delta => `[Delta,Mike,Zulu,Alpha]`; Cũ nhất => `[Delta,Alpha,Zulu,Mike]`; A–Z => `[Delta,Alpha,Mike,Zulu]`; Recent after opening Zulu→Alpha => `[Alpha,Zulu,Mike,Delta]`; reload giữ Recent + pin; overflowX=false; console SEVERE=[] .
+- Local mobile 393×852: A–Z + pin priority đúng; sort control 44px; pin/delete >=44px; Recent row/count + order đúng; no overflow/nested buttons; sort preference `title-asc` persisted after reload; console SEVERE=[] .
+- Feature commit `8ca3b92` (`feat: add pin sort and recent notes`) pushed `main`; Vercel `notepad-online-dqukqqd8l-trunknguen.vercel.app` Ready; production alias served exact local JS bundle `assets/index-BqJz-Nup.js`.
+- Production desktop smoke: default `[Delta,Mike,Zulu,Alpha]`, A–Z `[Delta,Alpha,Mike,Zulu]`, Recent `[Alpha,Zulu,Mike,Delta]`, pin 44×56, no overflow/nested, console SEVERE=[] .
+- Production iPhone 393×852: Recent row count=4, same list order/persistence, sort 69×44, pin buttons 44×56, no overflow, console SEVERE=[] .
+- Isolated Sync Key SHA-256 root `9f486f5bac01bfdc793e91443f2b8c2c331f89b67361e9bcf2ba64b582cb862b` cleanup via Firebase CLI exit 0; final production browser readback = 0 note / 0 editor.
+
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
-Compact header đã production PASS cùng checklist/folder flows hiện có. Bundle/code-splitting và Firestore Rules hardening vẫn còn. Apple Notes Sync + Vault đã được ghi lại như future design, chưa đưa vào current implementation phase.
+Pin + Sort + Recent, compact header, checklist, folder flows và branding logo hiện đều production PASS. Bundle/code-splitting, Firestore Rules hardening, search/toast/shortcuts và Apple Notes Sync + Vault vẫn còn backlog.
 
 ## 7. Next actions
 
-1. User acceptance compact header/checklist trên iPhone thật.
+1. User acceptance Pin + Sort + Recent (cùng compact header/checklist) trên iPhone thật.
 2. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
 3. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
-4. Tiếp tục backlog feature (toast/search/shortcuts...).
+4. Tiếp tục backlog feature (search/toast/shortcuts...); Apple Notes Sync + Vault giữ ở future design cho tới khi user bắt đầu phase đó.
 
 ## 8. Archive rule
 
@@ -186,3 +202,4 @@ Mọi công việc Notepad mặc định phải thực hiện ở project hiện
 - 2026-10-01: Push feature commit `822c80b`; Vercel deployment `notepad-online-fyoy7lzt2-trunknguen.vercel.app` Ready; production desktop/mobile checklist smoke PASS, test note cleanup=0.
 - 2026-10-03: Compact editor header rollout production: feature `f8f7c63` push `main`; Vercel alias nhận bundle `index-fN71wbty.js`; desktop + iPhone 393×852 smoke PASS, `Aa` round-trip PASS, mobile reload persistence PASS; transient Firestore Listen 404 không tái hiện sau clear-log rerun; isolated test workspace cleanup=0.
 - 2026-10-03: Branding logo A rollout: added `public/notepad-logo.svg`, header avatar `N` replaced with folded-note logo; build + light/dark/mobile visual PASS; feature `2cf812b` pushed `main`; Vercel `6950taq52` Ready; production logo 40×40/no-overflow PASS.
+- 2026-10-03: Pin + Sort + Recent rollout: feature `8ca3b92` pushed `main`; Vercel `dqukqqd8l` Ready; pinned priority + Mới sửa/Cũ nhất/A–Z + virtual Recent 10-note view verified local/production desktop+iPhone; isolated workspace cleanup=0.

@@ -2,7 +2,7 @@
 
 - Last verified: 2026-10-03
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: Compact editor header + checklist/folder flows + branding logo A production PASS. Logo feature `2cf812b` pushed `main`; Vercel `6950taq52` Ready; production logo SVG render 40×40/no-overflow PASS.
+- Current phase: Pin + Sort + Recent notes production PASS on top of existing compact header/checklist/folder/logo flows. Feature `8ca3b92` pushed `main`; Vercel `dqukqqd8l` Ready; desktop+iPhone smoke PASS; isolated test cleanup=0.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
@@ -64,6 +64,15 @@
 - Local desktop light/dark + mobile 393×852 visual PASS; production Selenium readback logo complete=true, natural 150×150, rendered 40×40, no page overflow.
 - Feature commit `2cf812b` pushed `main`; Vercel deployment `notepad-online-6950taq52-trunknguen.vercel.app` Ready.
 
+## Pin + Sort + Recent verified 2026-10-03
+- Notes now support backward-compatible `pinned` + `lastOpenedAt`; pin/open metadata writes do not touch `updatedAt`.
+- Normal list sort options: updated desc, updated asc, title A–Z; pinned always first. Preference persists in `localStorage:notepad-note-sort`.
+- Virtual system folder `recent` shows up to 10 most recently explicitly opened notes, ordered by `lastOpenedAt`; this metadata syncs via Firestore across devices.
+- Local build PASS: 1705 modules; JS 822.27 kB / 233.44 kB gzip; existing >500 kB chunk warning remains.
+- Local desktop/mobile regressions PASS; iPhone 393×852 sort control=44px, pin/delete >=44px, overflowX=0, nested buttons=0, console SEVERE=[] .
+- Production feature commit `8ca3b92`; Vercel `notepad-online-dqukqqd8l-trunknguen.vercel.app` Ready; production alias bundle `index-BqJz-Nup.js`; desktop/mobile smoke PASS.
+- Isolated test workspace SHA root `9f486f5bac01bfdc793e91443f2b8c2c331f89b67361e9bcf2ba64b582cb862b` cleanup exit 0; final browser readback 0 notes.
+
 ## Deferred future design captured 2026-10-03
 - Apple Notes Sync + Locked Notes/Vault đã được ghi chi tiết trong `docs\TODOLIST.md` và canonical progress section 5E.
 - Resume intent: prototype iOS Shortcuts với normal/checklist/locked note trước; V1 one-way bulk/import + incremental create/update nếu metadata đủ tin cậy; no auto-delete.
@@ -77,7 +86,7 @@
 - Không có test/lint script canonical trong `package.json`.
 
 ## Next actions
-1. User acceptance compact header/checklist on real iPhone.
+1. User acceptance Pin + Sort + Recent together with compact header/checklist on real iPhone.
 2. Continue bundle optimization + Firestore Rules hardening.
 3. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
 

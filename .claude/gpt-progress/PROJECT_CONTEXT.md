@@ -23,10 +23,10 @@
 - TipTap rich-text editor; runtime line verified 2.27.2. Checklist uses `TaskList` + `TaskItem` serialized inside note HTML.
 - Firebase Firestore.
 - Sync Key được SHA-256 trước khi dùng làm Firestore document path.
-- Notes: `sync_data/{hash}/notes/{noteId}`; folder organization dùng `folderId` nullable để giữ backward compatibility.
+- Notes: `sync_data/{hash}/notes/{noteId}`; folder organization dùng `folderId` nullable; Pin/Recent dùng backward-compatible `pinned` + `lastOpenedAt` metadata.
 - Folders: `sync_data/{hash}/folders/{folderId}`; create/read/update rules đã deploy, delete deny trong v1.
 - Desktop folder UI = 3 pane; mobile = Folders → Notes → Editor.
-- Vercel config có trong `vercel.json`; production alias `https://notepad-online-beta.vercel.app` hiện chạy compact editor header + Checklist/Task list sau feature commit `f8f7c63`.
+- Vercel config có trong `vercel.json`; production alias `https://notepad-online-beta.vercel.app` hiện chạy Pin + Sort + Recent cùng compact editor/checklist/folder/logo flows sau feature commit `8ca3b92`.
 
 ## Critical rules
 Không đọc `.env` nếu task không cần.

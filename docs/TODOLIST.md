@@ -42,8 +42,9 @@
 ### 🟡 Ưu tiên Trung bình — Bản 1.2
 
 - [ ] **Xóa folder an toàn** — Nếu bổ sung, chỉ xóa folder metadata và chuyển notes bên trong về `Chưa phân loại`; không cascade-delete note.
-- [ ] **Ghim ghi chú (Pin)** — Ghim ghi chú quan trọng lên đầu danh sách, lưu cờ `pinned: boolean` vào Firestore, hiển thị icon 📌.
-- [ ] **Sắp xếp notes** — Dropdown sắp xếp: Mới nhất trước, Cũ nhất trước, Tên A-Z, Tên Z-A.
+- [x] **Ghim ghi chú (Pin)** — ✅ 2026-10-03: `pinned` backward-compatible trong Firestore; pin/unpin không touch `updatedAt`; pinned notes luôn ưu tiên đầu danh sách; desktop/mobile + reload persistence PASS.
+- [x] **Sắp xếp notes** — ✅ 2026-10-03: dropdown `Mới sửa / Cũ nhất / A–Z`; pinned priority giữ trước sort; preference persist localStorage; iPhone control 44px.
+- [x] **Gần đây / Recent notes** — ✅ 2026-10-03: virtual system folder `Gần đây`, tối đa 10 note mở gần nhất qua `lastOpenedAt`; sync chéo iPhone/laptop, recent ordering persist sau reload; không làm đổi `updatedAt`.
 - [ ] **Word/Character count** — Hiển thị số từ + số ký tự ở footer editor, cập nhật real-time.
 - [ ] **Export ra JSON** — Nút "Xuất dữ liệu" tải tất cả ghi chú về file `.json` để backup thủ công.
 - [ ] **Import từ JSON** — Nút "Nhập dữ liệu" cho phép chọn file `.json` đã export trước đó để khôi phục.

@@ -5,11 +5,11 @@
 
 ## Verified source evidence
 - `src\App.jsx`: root layout, Sync Key state, folder/note selection, desktop 3-pane/mobile 3-step navigation và `@trunk.ng` attribution.
-- `src\hooks\useNotes.js`: SHA-256 Sync Key, Firestore listener, CRUD helpers và nullable `folderId`.
+- `src\hooks\useNotes.js`: SHA-256 Sync Key, Firestore listener, CRUD helpers, nullable `folderId`, backward-compatible `pinned` + `lastOpenedAt`, dedicated pin/open metadata writes không touch `updatedAt`.
 - `src\hooks\useFolders.js`: Firestore realtime folders + create/rename.
 - `src\components\FolderList.jsx`, `FolderDialog.jsx`, `FolderPicker.jsx`: folder navigation/create/rename/note assignment UI.
 - `src\components\NoteEditor.jsx`: TipTap editor + autosave + folder picker + TaskList/TaskItem checklist toolbar command.
-- `src\components\NoteList.jsx`: note list/create/delete + mobile back-to-folders navigation.
+- `src\components\NoteList.jsx`: note list/create/delete + pin/unpin + persisted sort selector + mobile back-to-folders navigation; Recent view preserves last-opened ordering.
 - `src\components\SyncKeyModal.jsx`: Sync Key input flow.
 - `src\lib\firebase.js`: Firebase init từ `VITE_FIREBASE_*`.
 - `package.json`: React/Vite/Tailwind/TipTap/Firebase dependencies và npm scripts.
@@ -21,6 +21,7 @@
 - Baseline at checklist start: local/remote `main` = `ef2c3ed7ad0e2bf8e6f08f0558ac774fc65c9ae8`.
 - Checklist rollout feature commit: `822c80b29be0e622fd229b6769ec0613e43284c8`, pushed to `main`.
 - Compact header feature commit: `f8f7c63` (`feat: compact note editor header`), pushed to `main`; production alias served matching runtime bundle `assets/index-fN71wbty.js`.
+- Pin/Sort/Recent feature commit: `8ca3b92` (`feat: add pin sort and recent notes`), pushed to `main`; production alias served matching runtime bundle `assets/index-BqJz-Nup.js`.
 - `.env` remains ignored and was not read/staged.
 
 ## Runtime/mobile evidence — 2026-09-21
@@ -88,6 +89,15 @@
 - Git feature commit `2cf812b` pushed to `main`.
 - Vercel deployment `notepad-online-6950taq52-trunknguen.vercel.app` status Ready.
 - Production alias browser readback: image complete=true, natural size 150×150, rendered size 40×40, page overflow=false.
+
+## Pin + Sort + Recent evidence — 2026-10-03
+- Local final build PASS: 1705 modules; JS 822.27 kB minified / 233.44 kB gzip; existing >500 kB chunk warning remains.
+- Desktop isolated 4-note regression: initial newest `[Mike,Zulu,Alpha,Delta]`; pin Delta => `[Delta,Mike,Zulu,Alpha]`; Cũ nhất => `[Delta,Alpha,Zulu,Mike]`; A–Z => `[Delta,Alpha,Mike,Zulu]`.
+- Explicit opens Zulu then Alpha produced Recent `[Alpha,Zulu,Mike,Delta]`; same order after reload; Delta pin persisted; nested buttons=0; pin controls 44×56; overflowX=false; console SEVERE=[] .
+- Mobile 393×852 local: default pinned ordering `[Delta,Mike,Zulu,Alpha]`; A–Z `[Delta,Alpha,Mike,Zulu]`; Recent row count=4 and order `[Alpha,Zulu,Mike,Delta]`; sort control final 69×44; pin/delete controls >=44px; sort `title-asc` persisted after reload; overflowX=false; console SEVERE=[] .
+- Vercel production deployment `notepad-online-dqukqqd8l-trunknguen.vercel.app` status Ready; alias `https://notepad-online-beta.vercel.app` served exact local bundle `assets/index-BqJz-Nup.js`.
+- Production desktop smoke: pin priority, A–Z, Recent, 44×56 pin, no overflow/nested, severe console=[] . Production iPhone 393×852: Recent row count=4, sort 69×44, pin controls 44×56, no overflow, severe console=[] .
+- Isolated workspace Sync Key hash root `9f486f5bac01bfdc793e91443f2b8c2c331f89b67361e9bcf2ba64b582cb862b`; Firebase CLI recursive cleanup exit 0; final production browser readback `cards=0`, `editors=0`, test titles absent.
 
 ## Still unverified
 - Firestore rule hardening beyond current Sync-Key model and PWA offline behavior remain open.
