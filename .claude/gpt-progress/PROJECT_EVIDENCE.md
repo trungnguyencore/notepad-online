@@ -20,6 +20,7 @@
 - Folder/Instagram rollout commit: `d9165d0c8c9248df3cfaf2ee5e035650f2b09de8`, pushed to `main`.
 - Baseline at checklist start: local/remote `main` = `ef2c3ed7ad0e2bf8e6f08f0558ac774fc65c9ae8`.
 - Checklist rollout feature commit: `822c80b29be0e622fd229b6769ec0613e43284c8`, pushed to `main`.
+- Compact header feature commit: `f8f7c63` (`feat: compact note editor header`), pushed to `main`; production alias served matching runtime bundle `assets/index-fN71wbty.js`.
 - `.env` remains ignored and was not read/staged.
 
 ## Runtime/mobile evidence — 2026-09-21
@@ -75,7 +76,10 @@
 - Desktop local visual acceptance: viewport 1424×749, no page overflow, folder chip 32px, toolbar 44px một hàng.
 - iPhone emulation 393×852: no page overflow, folder chip 44px, toolbar 44px; horizontal swipe còn hoạt động nhưng scrollbar ẩn; Checklist nằm trong vùng nhìn thấy ngay sau `Aa`.
 - Mobile save metadata dùng `HH:mm · trạng thái`; desktop vẫn full date/time. Isolated visual-test Sync Key đã cleanup về 0 note.
-- Chưa commit/push/deploy; production chưa đổi.
+- Production desktop smoke: no page overflow, toolbar 44px một hàng, Checklist + `Aa` visible; `Aa` paragraph→H2→paragraph verified (`h2Count 1 → 0`); severe console=[] .
+- Production iPhone emulation 393×852: no page overflow, folder chip 44px, toolbar/style/checklist 44px, Checklist visible in viewport, toolbar horizontal-scroll 394/329px with hidden scrollbar; content persisted through reload.
+- First mobile capture logged one transient Firestore Listen channel 404; two subsequent 5-second reruns after clearing initial logs had severe console=[] and persisted content unchanged, so it was not reproducible as a functional regression.
+- Production isolated Sync Key root SHA-256 = `fb009209ef7192ae85b309bef556020efbc39128428499df6138c002403887ce`; exact Firebase CLI recursive cleanup completed exit 0; final browser readback = 0 note cards / 0 editor.
 
 ## Still unverified
 - Firestore rule hardening beyond current Sync-Key model and PWA offline behavior remain open.

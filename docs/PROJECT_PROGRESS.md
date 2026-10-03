@@ -2,7 +2,7 @@
 
 - **Last verified:** 2026-10-03
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** Checklist/Task list vẫn production PASS. Compact editor header đã local visual-acceptance PASS trên desktop và iPhone 393×852: folder picker nằm trên metadata line, H1/H2/H3 gom vào `Aa`, checklist ưu tiên trong vùng nhìn thấy mobile, toolbar/header spacing được nén; final build PASS và isolated test workspace cleanup=0. Chưa commit/push/deploy.
+- **Status:** Compact editor header đã rollout production PASS. Feature commit `f8f7c63` đã push `main`; production alias `https://notepad-online-beta.vercel.app` nhận đúng bundle mới `assets/index-fN71wbty.js`. Desktop + iPhone 393×852 production smoke PASS, `Aa` selector round-trip H2→paragraph PASS, mobile persistence qua reload PASS, isolated test workspace cleanup=0.
 - **Backlog:** `docs\TODOLIST.md`
 - **AI rules:** `.claude\CLAUDE.md`
 
@@ -124,27 +124,29 @@ notepad app online/
 
 ## 5D. Compact editor header — 2026-10-03
 
-- Local-only UI refinement theo user review; không đổi Firestore schema, autosave, folder data model hoặc checklist serialization.
+- UI refinement theo user review; không đổi Firestore schema, autosave, folder data model hoặc checklist serialization.
 - `FolderPicker` được chuyển từ một hàng riêng lên cùng metadata line với `Cập nhật ... · trạng thái lưu`; desktop chip nhỏ hơn, mobile vẫn giữ touch target tối thiểu 44px.
 - Ba nút `H1/H2/H3` được gom thành một selector `Aa` với các lựa chọn paragraph/H1/H2/H3; Bold/Italic/Underline/list/checklist/quote giữ nguyên.
 - Header gap/padding và khoảng cách trước editor được giảm; toolbar desktop ép một hàng, mobile vẫn horizontal-scroll khi thiếu chỗ.
 - Final local visual acceptance PASS: desktop viewport 1424×749 không overflow ngang, folder chip 32px, toolbar 44px một hàng; iPhone emulation 393×852 không page overflow, folder chip giữ 44px touch target, toolbar 44px và horizontal swipe khi thiếu chỗ. Checklist được đưa ngay sau `Aa` để luôn thấy trên 393px; scrollbar ngang bị ẩn nhưng scroll vẫn hoạt động.
 - Mobile metadata rút gọn còn `HH:mm · trạng thái`; desktop vẫn giữ đầy đủ ngày giờ. Isolated Sync Key visual test đã cleanup về 0 note.
 - Final `npm run build` PASS ngày 2026-10-03: 1705 modules, JS 818.69 kB / 232.53 kB gzip; warning chunk >500 kB vẫn còn.
-- Chưa commit/push/deploy; production hiện chưa đổi.
+- Production rollout: feature commit `f8f7c63` pushed to `main`; Vercel production alias served exact local runtime bundle `assets/index-fN71wbty.js`.
+- Production desktop smoke PASS: no page overflow; toolbar 44px một hàng; Checklist + `Aa` visible; `Aa` đổi paragraph→H2 rồi H2→paragraph đúng (`1 → 0` H2 node); severe console=[] .
+- Production iPhone emulation 393×852 PASS: no page overflow; folder chip 44px; toolbar/style/checklist 44px; Checklist nằm trong viewport; toolbar horizontal-scroll 394/329px nhưng scrollbar ẩn; content persist qua reload. Lần đầu có một Firestore Listen 404 transient; hai lượt rerun sau khi clear log đều severe console=[] và dữ liệu vẫn persist.
+- Isolated production test workspace cleanup dùng exact SHA-256 root `fb009209ef7192ae85b309bef556020efbc39128428499df6138c002403887ce`; Firebase CLI recursive cleanup exit 0; final browser readback = 0 note / 0 editor.
 
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
-Compact header đang local-only nhưng desktop/iPhone visual acceptance đã PASS; chờ user duyệt rollout commit/push/deploy. Checklist v1 production vẫn PASS. Bundle/code-splitting và Firestore Rules hardening vẫn còn.
+Compact header đã production PASS cùng checklist/folder flows hiện có. Bundle/code-splitting và Firestore Rules hardening vẫn còn.
 
 ## 7. Next actions
 
-1. User review compact header local đã visual-PASS; nếu duyệt thì commit/push/deploy và smoke production.
-2. User acceptance checklist trên iPhone thật.
-3. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
-4. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
-5. Tiếp tục backlog feature (toast/search/shortcuts...).
+1. User acceptance compact header/checklist trên iPhone thật.
+2. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
+3. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
+4. Tiếp tục backlog feature (toast/search/shortcuts...).
 
 ## 8. Archive rule
 
@@ -163,4 +165,4 @@ Mọi công việc Notepad mặc định phải thực hiện ở project hiện
 - 2026-09-21: Push commit `d9165d0` lên `main`; Vercel auto-deploy folder UI Ready; production alias `notepad-online-beta.vercel.app` smoke PASS cho create/rename folder, folder-scoped note, move-to-Unfiled và Instagram attribution; test workspace cleanup PASS.
 - 2026-10-01: Tạo backup pre-checklist; thêm TipTap TaskList/TaskItem + toolbar Checklist + checked styling; build PASS; normal save/reload + fast switch/back + mobile cold-start regressions PASS; 5/5 test workspaces cleanup về 0.
 - 2026-10-01: Push feature commit `822c80b`; Vercel deployment `notepad-online-fyoy7lzt2-trunknguen.vercel.app` Ready; production desktop/mobile checklist smoke PASS, test note cleanup=0.
-- 2026-10-03: Local compact editor header: folder picker chuyển lên metadata line, H1/H2/H3 gom vào `Aa`, checklist ưu tiên mobile, ẩn toolbar scrollbar và rút gọn mobile save metadata; desktop + iPhone 393×852 visual acceptance PASS, final build PASS, isolated test cleanup=0. Chưa commit/push/deploy.
+- 2026-10-03: Compact editor header rollout production: feature `f8f7c63` push `main`; Vercel alias nhận bundle `index-fN71wbty.js`; desktop + iPhone 393×852 smoke PASS, `Aa` round-trip PASS, mobile reload persistence PASS; transient Firestore Listen 404 không tái hiện sau clear-log rerun; isolated test workspace cleanup=0.
