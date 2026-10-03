@@ -81,5 +81,13 @@
 - First mobile capture logged one transient Firestore Listen channel 404; two subsequent 5-second reruns after clearing initial logs had severe console=[] and persisted content unchanged, so it was not reproducible as a functional regression.
 - Production isolated Sync Key root SHA-256 = `fb009209ef7192ae85b309bef556020efbc39128428499df6138c002403887ce`; exact Firebase CLI recursive cleanup completed exit 0; final browser readback = 0 note cards / 0 editor.
 
+## Branding logo A evidence — 2026-10-03
+- Source: `public/notepad-logo.svg` + `src/App.jsx` header image replacement only; no Firestore/data logic change.
+- Local build PASS: 1705 modules; JS 818.62 kB minified / 232.55 kB gzip; existing chunk warning remains.
+- Local visual: desktop light, desktop dark, mobile 393×852 all rendered 40×40 logo with no page overflow.
+- Git feature commit `2cf812b` pushed to `main`.
+- Vercel deployment `notepad-online-6950taq52-trunknguen.vercel.app` status Ready.
+- Production alias browser readback: image complete=true, natural size 150×150, rendered size 40×40, page overflow=false.
+
 ## Still unverified
 - Firestore rule hardening beyond current Sync-Key model and PWA offline behavior remain open.

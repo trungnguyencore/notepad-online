@@ -1,6 +1,6 @@
 # 📋 TODO List — Notepad App Online
 
-> **Cập nhật:** 2026-10-01 | **Phiên bản hiện tại:** 1.0.0
+> **Cập nhật:** 2026-10-03 | **Phiên bản hiện tại:** 1.0.0
 
 ---
 
@@ -28,6 +28,7 @@
 
 - [x] **Folder organization v1** — ✅ 2026-09-21: tạo/đổi tên folder, desktop 3-pane, mobile Folder→Notes→Editor, note có `folderId`, chuyển note giữa folder/Chưa phân loại, backward-compatible note cũ.
 - [x] **Instagram attribution** — ✅ Header có `@trunk.ng` link `https://www.instagram.com/trunk.ng/`, mở tab mới; browser test PASS.
+- [x] **Branding logo A** — ✅ 2026-10-03: folded-note SVG thay avatar chữ `N`; light/dark/mobile visual PASS; production alias render 40×40/no-overflow PASS.
 - [x] **Checklist / Task list kiểu Apple Notes** — ✅ 2026-10-01: toolbar Checklist 44×44, Enter tạo item mới, click checkbox giữ `checked` qua autosave/Firestore, checked text line-through; desktop/mobile + fast-switch/back regression PASS; production Vercel smoke PASS.
 - [ ] **Toast Notifications** — Thông báo đẹp khi: mất kết nối Firestore, lưu thành công, lỗi CRUD. Dùng component tự build, animate slide-in từ bottom.
 - [x] **Confirm Dialog khi xóa** — ✅ Custom modal responsive, nút Hủy / Xóa tối thiểu 44px, Escape/backdrop cancel trên desktop.
@@ -56,7 +57,25 @@
 - [ ] **Markdown shortcuts** — Gõ `#` → heading, `-` → bullet list, `>` → blockquote tự động format.
 - [ ] **Note Statistics Dashboard** — Thống kê: tổng số ghi chú, tổng số từ, ghi chú gần đây, hoạt động theo ngày.
 - [ ] **PWA Offline Support** — Service Worker cache + IndexedDB lưu local, đồng bộ khi có mạng.
-- [ ] **End-to-End Encryption** — Mã hóa nội dung bằng AES-256 trước khi gửi lên Firestore, chỉ giải mã ở client.
+- [ ] **End-to-End Encryption** — Mã hóa nội dung trước khi gửi lên Firestore, chỉ giải mã ở client.
+
+### 🔵 Future integration — Apple Notes Sync + Locked Notes
+
+> Đây là **kế hoạch tương lai / chưa implement / chưa kiểm chứng đầy đủ trên iPhone thật**. Khi bắt đầu phải prototype trước, không coi các giả định Shortcuts bên dưới là fact.
+
+- [ ] **Prototype Apple Notes → Notepad Online bằng iOS Shortcuts** — test tối thiểu 3 note thật: 1 note thường, 1 checklist, 1 note đang khóa; xác minh chính xác Shortcut trả được field nào (title/body/folder/created/modified/formatting/locked state hoặc identifier nếu có).
+- [ ] **Apple Notes Sync V1 — one-way import** — ưu tiên flow `Apple Notes → iOS Shortcut → HTTPS import endpoint → Notepad Online/Firestore`; chưa làm realtime two-way sync ở V1.
+- [ ] **Bulk + incremental sync** — lần đầu import toàn bộ note hỗ trợ; các lần sau chỉ create/update note thay đổi nếu có metadata đủ tin cậy. Không match chỉ bằng title; cần thiết kế mapping/deduplication sau prototype.
+- [ ] **Không auto-delete ở V1** — xóa note trên Apple Notes không được tự cascade-delete bản web cho tới khi sync engine đủ tin cậy.
+- [ ] **Folder mapping** — nếu Shortcut cung cấp folder ổn định thì map Apple Notes folder sang folder của Notepad Online; giữ metadata nguồn để truy vết.
+- [ ] **Import report** — sau sync phải báo rõ số note imported/updated/skipped; locked note hoặc attachment chưa hỗ trợ phải được báo, không âm thầm bỏ qua.
+- [ ] **Locked Apple Notes handling** — không giả định Shortcut có thể đọc nội dung note đang khóa. Nếu prototype không đọc được sau xác thực iPhone thì V1 phải skip + report; không tìm cách bypass cơ chế khóa của Apple.
+- [ ] **Vault / Lock Note trên web** — thiết kế một `Vault Password` riêng với `Sync Key`; ưu tiên một vault password cho các locked note trong cùng workspace thay vì mỗi note một password.
+- [ ] **Client-side encryption cho locked note** — khi implement Vault, plaintext của locked note không được lưu trực tiếp lên Firestore; mã hóa/giải mã ở client, có versioned encrypted payload + salt/IV/KDF metadata theo thiết kế crypto được review trước khi code.
+- [ ] **Vault session timeout** — sau khi unlock có thể giữ vault mở tạm thời rồi tự lock lại; duration cụ thể quyết định khi implement.
+- [ ] **Locked-title privacy option** — mặc định có thể giữ title để dễ nhận diện; cân nhắc tùy chọn ẩn title của locked note ở phase sau.
+- [ ] **Import locked note sau Vault** — chỉ sau khi prototype xác minh iPhone có thể cung cấp plaintext hợp lệ và Vault encryption đã hoàn thiện mới cho phép import locked Apple Notes thành encrypted web note.
+- [ ] **Attachment/ảnh/PDF/scan/drawing** — để phase sau; V1 tập trung text, folder, thời gian, checklist/basic formatting nếu chuyển đổi tin cậy.
 
 ---
 

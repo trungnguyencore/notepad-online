@@ -2,7 +2,7 @@
 
 - Last verified: 2026-10-03
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: Compact editor header + checklist/folder flows production PASS. Feature `f8f7c63` đã push `main`; production alias nhận bundle mới; desktop/iPhone 393×852 smoke + `Aa` round-trip + mobile reload persistence PASS; isolated test cleanup=0.
+- Current phase: Compact editor header + checklist/folder flows + branding logo A production PASS. Logo feature `2cf812b` pushed `main`; Vercel `6950taq52` Ready; production logo SVG render 40×40/no-overflow PASS.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
@@ -58,9 +58,22 @@
 - Mobile 393×852 production smoke: cold `[true,false]`; task markup present; second check `[true,true]`; reload `[true,true]`; toolbar 44×44; overflowX=0; nested=0; console clean.
 - Test note cleanup via production UI PASS; `cleanupCards=0` on isolated Sync Key.
 
+## Branding logo A verified 2026-10-03
+- `public/notepad-logo.svg` added; `src/App.jsx` header uses it instead of the yellow `N` avatar.
+- Build PASS: 1705 modules; JS 818.62 kB / 232.55 kB gzip.
+- Local desktop light/dark + mobile 393×852 visual PASS; production Selenium readback logo complete=true, natural 150×150, rendered 40×40, no page overflow.
+- Feature commit `2cf812b` pushed `main`; Vercel deployment `notepad-online-6950taq52-trunknguen.vercel.app` Ready.
+
+## Deferred future design captured 2026-10-03
+- Apple Notes Sync + Locked Notes/Vault đã được ghi chi tiết trong `docs\TODOLIST.md` và canonical progress section 5E.
+- Resume intent: prototype iOS Shortcuts với normal/checklist/locked note trước; V1 one-way bulk/import + incremental create/update nếu metadata đủ tin cậy; no auto-delete.
+- Locked-note direction: `Vault Password` tách khỏi `Sync Key`, client-side encryption trước Firestore; nếu Shortcut không đọc được locked note thì skip + report. Attachment/media để phase sau.
+- Đây chỉ là planned design; chưa có implementation/evidence và không được report như feature đã làm.
+
 ## Not verified yet
 - Firestore Rules hardening beyond current Sync-Key trust model remains open.
 - PWA/offline behavior remains open.
+- Apple Notes Shortcuts metadata/locked-note behavior chưa được prototype trên iPhone thật.
 - Không có test/lint script canonical trong `package.json`.
 
 ## Next actions

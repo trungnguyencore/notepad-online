@@ -2,7 +2,7 @@
 
 - **Last verified:** 2026-10-03
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** Compact editor header đã rollout production PASS. Feature commit `f8f7c63` đã push `main`; production alias `https://notepad-online-beta.vercel.app` nhận đúng bundle mới `assets/index-fN71wbty.js`. Desktop + iPhone 393×852 production smoke PASS, `Aa` selector round-trip H2→paragraph PASS, mobile persistence qua reload PASS, isolated test workspace cleanup=0.
+- **Status:** Compact editor header + branding logo A đã rollout production PASS. Logo feature commit `2cf812b` thay vòng tròn `N` bằng `public/notepad-logo.svg`; Vercel deployment `notepad-online-6950taq52-trunknguen.vercel.app` Ready và production alias render logo 40×40 đúng, no overflow. Checklist/folder/header flows trước đó vẫn production PASS.
 - **Backlog:** `docs\TODOLIST.md`
 - **AI rules:** `.claude\CLAUDE.md`
 
@@ -136,10 +136,29 @@ notepad app online/
 - Production iPhone emulation 393×852 PASS: no page overflow; folder chip 44px; toolbar/style/checklist 44px; Checklist nằm trong viewport; toolbar horizontal-scroll 394/329px nhưng scrollbar ẩn; content persist qua reload. Lần đầu có một Firestore Listen 404 transient; hai lượt rerun sau khi clear log đều severe console=[] và dữ liệu vẫn persist.
 - Isolated production test workspace cleanup dùng exact SHA-256 root `fb009209ef7192ae85b309bef556020efbc39128428499df6138c002403887ce`; Firebase CLI recursive cleanup exit 0; final browser readback = 0 note / 0 editor.
 
+## 5E. Deferred future design — Apple Notes Sync + Vault — 2026-10-03
+
+- User muốn sau này sync toàn bộ Apple Notes trên iPhone lên Notepad Online và có xử lý riêng cho note đang khóa.
+- Hướng đã ghi vào backlog: prototype iOS Shortcuts trước với 3 note thật (normal/checklist/locked), sau đó mới khóa schema/API; chưa giả định Shortcut đọc được locked note hoặc có stable note ID.
+- V1 dự kiến one-way import `Apple Notes → iOS Shortcut → HTTPS import endpoint → Notepad Online/Firestore`; bulk first sync + incremental create/update nếu metadata cho phép; không auto-delete web note khi Apple Note bị xóa.
+- Locked note design dự kiến dùng `Vault Password` riêng với `Sync Key`, ưu tiên một vault cho locked notes trong workspace; plaintext locked note phải được mã hóa/giải mã client-side trước khi lưu Firestore. Crypto details phải review khi implement, chưa chốt algorithm/KDF ở state hiện tại.
+- Nếu locked Apple Notes không đọc được qua Shortcut sau xác thực iPhone thì V1 phải skip + report, không bypass cơ chế khóa. Attachment/ảnh/PDF/scan/drawing để phase sau.
+- Đây là **future design only**: chưa có code, endpoint, schema migration, iPhone prototype hoặc production evidence.
+
+## 5F. Branding logo A rollout — 2026-10-03
+
+- User chọn concept A: folded note tối giản, nền cream, góc gập vàng, ba dòng charcoal và accent dot vàng.
+- Added `public/notepad-logo.svg`; header `src/App.jsx` thay avatar chữ `N` bằng SVG 40×40, giữ nguyên header height/layout và accessibility thông qua title text hiện có.
+- Local `npm run build` PASS: 1705 modules; JS 818.62 kB / 232.55 kB gzip; warning chunk >500 kB vẫn còn.
+- Local visual acceptance PASS desktop light/dark + mobile 393×852: logo load đúng, 40×40, no page overflow.
+- Feature commit `2cf812b` (`feat: add notepad brand logo`) pushed `main`; Vercel deployment `notepad-online-6950taq52-trunknguen.vercel.app` Ready.
+- Production alias `https://notepad-online-beta.vercel.app` Selenium readback: logo complete=true, natural 150×150, rendered 40×40, page overflow=false.
+- Không đổi Firestore, Sync Key, note/editor/folder behavior hoặc archive/backups.
+
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
-Compact header đã production PASS cùng checklist/folder flows hiện có. Bundle/code-splitting và Firestore Rules hardening vẫn còn.
+Compact header đã production PASS cùng checklist/folder flows hiện có. Bundle/code-splitting và Firestore Rules hardening vẫn còn. Apple Notes Sync + Vault đã được ghi lại như future design, chưa đưa vào current implementation phase.
 
 ## 7. Next actions
 
@@ -166,3 +185,4 @@ Mọi công việc Notepad mặc định phải thực hiện ở project hiện
 - 2026-10-01: Tạo backup pre-checklist; thêm TipTap TaskList/TaskItem + toolbar Checklist + checked styling; build PASS; normal save/reload + fast switch/back + mobile cold-start regressions PASS; 5/5 test workspaces cleanup về 0.
 - 2026-10-01: Push feature commit `822c80b`; Vercel deployment `notepad-online-fyoy7lzt2-trunknguen.vercel.app` Ready; production desktop/mobile checklist smoke PASS, test note cleanup=0.
 - 2026-10-03: Compact editor header rollout production: feature `f8f7c63` push `main`; Vercel alias nhận bundle `index-fN71wbty.js`; desktop + iPhone 393×852 smoke PASS, `Aa` round-trip PASS, mobile reload persistence PASS; transient Firestore Listen 404 không tái hiện sau clear-log rerun; isolated test workspace cleanup=0.
+- 2026-10-03: Branding logo A rollout: added `public/notepad-logo.svg`, header avatar `N` replaced with folded-note logo; build + light/dark/mobile visual PASS; feature `2cf812b` pushed `main`; Vercel `6950taq52` Ready; production logo 40×40/no-overflow PASS.
