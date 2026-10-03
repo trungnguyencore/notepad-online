@@ -9,7 +9,7 @@
 - `src\hooks\useFolders.js`: Firestore realtime folders + create/rename.
 - `src\components\FolderList.jsx`, `FolderDialog.jsx`, `FolderPicker.jsx`: folder navigation/create/rename/note assignment UI.
 - `src\components\NoteEditor.jsx`: TipTap editor + autosave + folder picker + TaskList/TaskItem checklist toolbar command.
-- `src\components\NoteList.jsx`: note list/create/delete + pin/unpin + persisted sort selector + mobile back-to-folders navigation; Recent view preserves last-opened ordering.
+- `src\components\NoteList.jsx`: note list/create/delete + pin/unpin + persisted sort selector + global search UI/highlight + mobile back-to-folders navigation; Recent view preserves last-opened ordering.
 - `src\components\SyncKeyModal.jsx`: Sync Key input flow.
 - `src\lib\firebase.js`: Firebase init từ `VITE_FIREBASE_*`.
 - `package.json`: React/Vite/Tailwind/TipTap/Firebase dependencies và npm scripts.
@@ -22,6 +22,7 @@
 - Checklist rollout feature commit: `822c80b29be0e622fd229b6769ec0613e43284c8`, pushed to `main`.
 - Compact header feature commit: `f8f7c63` (`feat: compact note editor header`), pushed to `main`; production alias served matching runtime bundle `assets/index-fN71wbty.js`.
 - Pin/Sort/Recent feature commit: `8ca3b92` (`feat: add pin sort and recent notes`), pushed to `main`; production alias served matching runtime bundle `assets/index-BqJz-Nup.js`.
+- Global Search feature commit: `f5cdc7b` (`feat: add global note search`), pushed to `main`; production alias served matching runtime bundle `assets/index-Ci2FaFSR.js`.
 - `.env` remains ignored and was not read/staged.
 
 ## Runtime/mobile evidence — 2026-09-21
@@ -98,6 +99,14 @@
 - Vercel production deployment `notepad-online-dqukqqd8l-trunknguen.vercel.app` status Ready; alias `https://notepad-online-beta.vercel.app` served exact local bundle `assets/index-BqJz-Nup.js`.
 - Production desktop smoke: pin priority, A–Z, Recent, 44×56 pin, no overflow/nested, severe console=[] . Production iPhone 393×852: Recent row count=4, sort 69×44, pin controls 44×56, no overflow, severe console=[] .
 - Isolated workspace Sync Key hash root `9f486f5bac01bfdc793e91443f2b8c2c331f89b67361e9bcf2ba64b582cb862b`; Firebase CLI recursive cleanup exit 0; final production browser readback `cards=0`, `editors=0`, test titles absent.
+
+## Global Search evidence — 2026-10-03
+- Local final build PASS: 1705 modules; JS 825.54 kB minified / 234.21 kB gzip; existing >500 kB chunk warning remains.
+- Desktop local: folder-scope `[Mon AI]`; global title query `project` => `[Project DFT]`; body query `hoc may` => `[Mon AI]` with highlighted `Học máy`; `bao cao` => `[Project DFT]` with highlighted `Báo cáo`; no-result=0; clear restores `[Mon AI]`; input=44px; clear=44×44; overflowX=false; nested=0; SEVERE=[] .
+- iPhone 393×852 local: same global title/body behavior; input 240×44 at 16px font; clear 44×44; sort 69×44; pin 44×56; overflowX=false; nested=0; SEVERE=[] .
+- Production alias served exact bundle `assets/index-Ci2FaFSR.js`; Vercel deployment `notepad-online-pzux3i19u-trunknguen.vercel.app` Ready.
+- Production desktop/mobile smoke reproduced title/body/no-accent/highlight/clear behavior; desktop input font 14px, mobile 16px; clear 44×44; mobile sort 69×44; overflowX=false; nested=0; SEVERE=[] .
+- Isolated workspace SHA-256 root `06e4629db15f4d840ff1a80393fe354c07fc596c10aacbed53238ce8c51aff57`; Firebase CLI recursive cleanup exit 0; final production browser readback `cards=0`, `editors=0`.
 
 ## Still unverified
 - Firestore rule hardening beyond current Sync-Key model and PWA offline behavior remain open.

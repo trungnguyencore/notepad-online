@@ -32,7 +32,7 @@
 - [x] **Checklist / Task list kiểu Apple Notes** — ✅ 2026-10-01: toolbar Checklist 44×44, Enter tạo item mới, click checkbox giữ `checked` qua autosave/Firestore, checked text line-through; desktop/mobile + fast-switch/back regression PASS; production Vercel smoke PASS.
 - [ ] **Toast Notifications** — Thông báo đẹp khi: mất kết nối Firestore, lưu thành công, lỗi CRUD. Dùng component tự build, animate slide-in từ bottom.
 - [x] **Confirm Dialog khi xóa** — ✅ Custom modal responsive, nút Hủy / Xóa tối thiểu 44px, Escape/backdrop cancel trên desktop.
-- [ ] **Tìm kiếm ghi chú** — Thanh search trong `NoteList`, lọc real-time theo tiêu đề và nội dung. Highlight từ khóa khớp.
+- [x] **Tìm kiếm ghi chú** — ✅ 2026-10-03: global real-time search toàn Sync Key theo title + plain-text body, hỗ trợ không dấu tiếng Việt, highlight match, clear restore folder/Recent, desktop+iPhone production PASS.
 - [ ] **Keyboard Shortcuts** — Hỗ trợ phím tắt:
   - `Ctrl+N` → Tạo ghi chú mới
   - `Ctrl+F` → Focus thanh tìm kiếm

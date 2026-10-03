@@ -2,7 +2,7 @@
 
 - **Last verified:** 2026-10-03
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** Pin + Sort + Recent notes đã rollout production PASS. Feature commit `8ca3b92` đã push `main`; Vercel deployment `notepad-online-dqukqqd8l-trunknguen.vercel.app` Ready; production alias phục vụ đúng bundle `assets/index-BqJz-Nup.js`. Desktop + iPhone 393×852 smoke PASS, pin/recent persist qua Firestore/reload, sort preference persist local, isolated test cleanup=0.
+- **Status:** Global note search đã rollout production PASS trên nền Pin + Sort + Recent. Feature commit `f5cdc7b` đã push `main`; Vercel deployment `notepad-online-pzux3i19u-trunknguen.vercel.app` Ready; production alias phục vụ đúng bundle `assets/index-Ci2FaFSR.js`. Desktop + iPhone 393×852 smoke PASS; title/body search, accent-insensitive match, highlight, clear, touch targets và isolated cleanup đều verified.
 - **Backlog:** `docs\TODOLIST.md`
 - **AI rules:** `.claude\CLAUDE.md`
 
@@ -171,17 +171,34 @@ notepad app online/
 - Production iPhone 393×852: Recent row count=4, same list order/persistence, sort 69×44, pin buttons 44×56, no overflow, console SEVERE=[] .
 - Isolated Sync Key SHA-256 root `9f486f5bac01bfdc793e91443f2b8c2c331f89b67361e9bcf2ba64b582cb862b` cleanup via Firebase CLI exit 0; final production browser readback = 0 note / 0 editor.
 
+## 5H. Global note search — 2026-10-03
+
+- Added global real-time search UI inside `NoteList`; search source là **toàn bộ notes trong Sync Key hiện tại**, không chỉ folder/Recent đang chọn.
+- Search match `title + plain-text body`; HTML content được giảm về text bằng `DOMParser` trước khi match.
+- Matching case-insensitive và Vietnamese diacritic-insensitive: ASCII `hoc may` match `Học máy`, `bao cao` match `Báo cáo`, `đ/Đ` normalize về `d/D`.
+- Khi search active, heading cột note đổi thành `Tìm kiếm`, caption hiện `N kết quả / total ghi chú`; clear search trả lại đúng folder/Recent scope.
+- Search results giữ pinned-first + sort semantics hiện có; Recent ordering chỉ tạm ngưng trong lúc search global, sau clear thì phục hồi.
+- Title/body preview highlight match đầu tiên; body preview tự recenter quanh match nếu match nằm ngoài 80 ký tự đầu.
+- Search input mobile-safe font 16px + height 44px; clear button 44×44; desktop font 14px.
+- Tạo note mới, đổi folder, đổi Sync Key hoặc back về folders đều clear transient search state.
+- Final local build PASS: 1705 modules; JS 825.54 kB / 234.21 kB gzip; Vite chunk >500 kB warning cũ vẫn còn.
+- Local desktop isolated regression từ folder `HocTap`: trước search `[Mon AI]`; `project` => global `[Project DFT]`; `hoc may` => `[Mon AI]` qua body và highlight `Học máy`; `bao cao` => `[Project DFT]` highlight `Báo cáo`; no-result => 0 cards; clear => `[Mon AI]`; input 44px, clear 44×44, no overflow/nested, console SEVERE=[] .
+- Local iPhone 393×852 regression PASS: global title/body search từ folder scope, body highlight `Học máy`, no-result 0 cards, clear restore folder; input 240×44 font 16px, clear 44×44, sort 69×44, pin 44×56, no overflow/nested, console SEVERE=[] .
+- Feature commit `f5cdc7b` (`feat: add global note search`) pushed `main`; Vercel `notepad-online-pzux3i19u-trunknguen.vercel.app` Ready; production alias served exact local runtime bundle `assets/index-Ci2FaFSR.js`.
+- Production desktop + iPhone 393×852 smoke reproduced global title/body search, no-accent match, highlight, clear behavior và 44px mobile targets; console SEVERE=[] .
+- Isolated Sync Key SHA-256 root `06e4629db15f4d840ff1a80393fe354c07fc596c10aacbed53238ce8c51aff57` cleanup via Firebase CLI exit 0; final production readback = 0 note cards / 0 editor.
+
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
-Pin + Sort + Recent, compact header, checklist, folder flows và branding logo hiện đều production PASS. Bundle/code-splitting, Firestore Rules hardening, search/toast/shortcuts và Apple Notes Sync + Vault vẫn còn backlog.
+Global Search, Pin + Sort + Recent, compact header, checklist, folder flows và branding logo hiện đều production PASS. Bundle/code-splitting, Firestore Rules hardening, toast/shortcuts và Apple Notes Sync + Vault vẫn còn backlog.
 
 ## 7. Next actions
 
-1. User acceptance Pin + Sort + Recent (cùng compact header/checklist) trên iPhone thật.
+1. User acceptance Global Search + Pin + Sort + Recent (cùng compact header/checklist) trên iPhone thật.
 2. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
 3. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
-4. Tiếp tục backlog feature (search/toast/shortcuts...); Apple Notes Sync + Vault giữ ở future design cho tới khi user bắt đầu phase đó.
+4. Tiếp tục backlog feature (toast/keyboard shortcuts...); Apple Notes Sync + Vault giữ ở future design cho tới khi user bắt đầu phase đó.
 
 ## 8. Archive rule
 
@@ -203,3 +220,4 @@ Mọi công việc Notepad mặc định phải thực hiện ở project hiện
 - 2026-10-03: Compact editor header rollout production: feature `f8f7c63` push `main`; Vercel alias nhận bundle `index-fN71wbty.js`; desktop + iPhone 393×852 smoke PASS, `Aa` round-trip PASS, mobile reload persistence PASS; transient Firestore Listen 404 không tái hiện sau clear-log rerun; isolated test workspace cleanup=0.
 - 2026-10-03: Branding logo A rollout: added `public/notepad-logo.svg`, header avatar `N` replaced with folded-note logo; build + light/dark/mobile visual PASS; feature `2cf812b` pushed `main`; Vercel `6950taq52` Ready; production logo 40×40/no-overflow PASS.
 - 2026-10-03: Pin + Sort + Recent rollout: feature `8ca3b92` pushed `main`; Vercel `dqukqqd8l` Ready; pinned priority + Mới sửa/Cũ nhất/A–Z + virtual Recent 10-note view verified local/production desktop+iPhone; isolated workspace cleanup=0.
+- 2026-10-03: Global Search rollout: feature `f5cdc7b` pushed `main`; Vercel `pzux3i19u` Ready; global title/body search + no-accent Vietnamese matching + highlight + clear verified desktop/iPhone production; isolated search workspace cleanup=0.

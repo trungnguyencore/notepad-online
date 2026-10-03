@@ -2,7 +2,7 @@
 
 - Last verified: 2026-10-03
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: Pin + Sort + Recent notes production PASS on top of existing compact header/checklist/folder/logo flows. Feature `8ca3b92` pushed `main`; Vercel `dqukqqd8l` Ready; desktop+iPhone smoke PASS; isolated test cleanup=0.
+- Current phase: Global Search + Pin + Sort + Recent production PASS on top of existing compact header/checklist/folder/logo flows. Search feature `f5cdc7b` pushed `main`; Vercel `pzux3i19u` Ready; desktop+iPhone search smoke PASS; isolated search test cleanup=0.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
@@ -73,6 +73,16 @@
 - Production feature commit `8ca3b92`; Vercel `notepad-online-dqukqqd8l-trunknguen.vercel.app` Ready; production alias bundle `index-BqJz-Nup.js`; desktop/mobile smoke PASS.
 - Isolated test workspace SHA root `9f486f5bac01bfdc793e91443f2b8c2c331f89b67361e9bcf2ba64b582cb862b` cleanup exit 0; final browser readback 0 notes.
 
+## Global Search verified 2026-10-03
+- Global search scans all notes in current Sync Key, not only selected folder/Recent scope.
+- Match source = note title + plain-text body. Matching is case-insensitive and Vietnamese diacritic-insensitive; `hoc may`→`Học máy`, `bao cao`→`Báo cáo` verified.
+- Search-active UI heading = `Tìm kiếm`, result count = `N kết quả / total ghi chú`; clear restores selected folder/Recent scope.
+- Existing pinned-first/sort behavior remains active for search results; Recent ordering resumes after search clear.
+- Local final build PASS: 1705 modules; JS 825.54 kB / 234.21 kB gzip; existing >500 kB chunk warning remains.
+- Local desktop + iPhone 393×852 regressions PASS: title/body/global/no-accent/highlight/clear; input 44px, mobile font 16px, clear 44×44, overflowX=0, nested buttons=0, console SEVERE=[] .
+- Feature `f5cdc7b` pushed `main`; Vercel `notepad-online-pzux3i19u-trunknguen.vercel.app` Ready; production alias served exact bundle `assets/index-Ci2FaFSR.js`; production desktop/mobile smoke PASS.
+- Isolated search workspace root `06e4629db15f4d840ff1a80393fe354c07fc596c10aacbed53238ce8c51aff57` cleanup exit 0; final production browser readback 0 notes.
+
 ## Deferred future design captured 2026-10-03
 - Apple Notes Sync + Locked Notes/Vault đã được ghi chi tiết trong `docs\TODOLIST.md` và canonical progress section 5E.
 - Resume intent: prototype iOS Shortcuts với normal/checklist/locked note trước; V1 one-way bulk/import + incremental create/update nếu metadata đủ tin cậy; no auto-delete.
@@ -86,7 +96,7 @@
 - Không có test/lint script canonical trong `package.json`.
 
 ## Next actions
-1. User acceptance Pin + Sort + Recent together with compact header/checklist on real iPhone.
+1. User acceptance Global Search + Pin + Sort + Recent together with compact header/checklist on real iPhone.
 2. Continue bundle optimization + Firestore Rules hardening.
 3. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
 
