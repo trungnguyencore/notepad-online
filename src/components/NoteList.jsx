@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronLeft, Pin, Plus, Trash2 } from 'lucide-react';
+import { ChevronLeft, Pin, Plus, Search, Trash2, X } from 'lucide-react';
 
 const SORT_STORAGE = 'notepad-note-sort';
 
@@ -39,8 +39,55 @@ function getTime(value) {
     return Number.isNaN(time) ? 0 : time;
 }
 
+function normalizeSearchText(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .toLocaleLowerCase('vi');
+}
+
+function HighlightedText({ text, query }) {
+    if (!query) return text;
+
+    const normalizedText = normalizeSearchText(text);
+    const normalizedQuery = normalizeSearchText(query).trim();
+    if (!normalizedQuery) return text;
+
+    const matchIndex = normalizedText.indexOf(normalizedQuery);
+    if (matchIndex < 0) return text;
+
+    const matchEnd = matchIndex + normalizedQuery.length;
+    return (
+        <>
+            {text.slice(0, matchIndex)}
+            <mark className="rounded bg-apple-accent px-0.5 text-black">
+                {text.slice(matchIndex, matchEnd)}
+            </mark>
+            {text.slice(matchEnd)}
+        </>
+    );
+}
+
+function getSearchPreview(content, query) {
+    const text = getPreviewText(content);
+    if (!text) return '';
+    if (!query?.trim()) return text.slice(0, 80);
+
+    const normalizedText = normalizeSearchText(text);
+    const normalizedQuery = normalizeSearchText(query).trim();
+    const matchIndex = normalizedText.indexOf(normalizedQuery);
+    if (matchIndex < 0) return text.slice(0, 80);
+
+    const start = Math.max(0, matchIndex - 28);
+    const end = Math.min(text.length, matchIndex + normalizedQuery.length + 44);
+    return `${start > 0 ? '…' : ''}${text.slice(start, end)}${end < text.length ? '…' : ''}`;
+}
+
 export default function NoteList({
     notes,
+    totalNoteCount = notes.length,
     selectedId,
     onSelect,
     onCreate,
@@ -50,6 +97,8 @@ export default function NoteList({
     title = 'Ghi chú',
     loading,
     recentMode = false,
+    searchQuery = '',
+    onSearchChange,
 }) {
     const [sortMode, setSortMode] = useState(() => localStorage.getItem(SORT_STORAGE) || 'updated-desc');
 
@@ -96,9 +145,13 @@ export default function NoteList({
                     </button>
                 )}
                 <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-note-title text-apple-text-primary">{title}</h2>
+                    <h2 className="truncate text-note-title text-apple-text-primary">{searchQuery.trim() ? 'Tìm kiếm' : title}</h2>
                     <p className="text-note-caption text-apple-text-secondary">
-                        {loading ? 'Đang đồng bộ...' : `${notes.length} ghi chú`}
+                        {loading
+                            ? 'Đang đồng bộ...'
+                            : searchQuery.trim()
+                                ? `${notes.length} kết quả / ${totalNoteCount} ghi chú`
+                                : `${notes.length} ghi chú`}
                     </p>
                 </div>
                 <button
@@ -109,6 +162,33 @@ export default function NoteList({
                 >
                     <Plus size={18} />
                 </button>
+            </div>
+
+            <div className="mt-3 px-1">
+                <div className="flex min-h-11 items-center gap-2 rounded-xl bg-apple-bg-tertiary px-3 focus-within:ring-2 focus-within:ring-apple-accent">
+                    <Search size={17} className="shrink-0 text-apple-text-secondary" aria-hidden="true" />
+                    <input
+                        type="text"
+                        inputMode="search"
+                        enterKeyHint="search"
+                        autoComplete="off"
+                        value={searchQuery}
+                        onChange={(event) => onSearchChange?.(event.target.value)}
+                        placeholder="Tìm trong tất cả ghi chú"
+                        aria-label="Tìm trong tất cả ghi chú"
+                        className="h-11 min-w-0 flex-1 bg-transparent text-[16px] text-apple-text-primary outline-none placeholder:text-apple-text-secondary sm:text-[14px]"
+                    />
+                    {searchQuery && (
+                        <button
+                            type="button"
+                            onClick={() => onSearchChange?.('')}
+                            className="-mr-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-apple-text-secondary hover:bg-apple-bg-primary hover:text-apple-text-primary active:scale-95 transition"
+                            aria-label="Xóa tìm kiếm"
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="mt-2 flex min-h-9 items-center justify-end px-1">
@@ -145,13 +225,15 @@ export default function NoteList({
 
                 {!loading && notes.length === 0 && (
                     <div className="rounded-note bg-apple-bg-tertiary p-4 text-note-caption text-apple-text-secondary">
-                        Chưa có ghi chú nào. Hãy tạo ghi chú đầu tiên.
+                        {searchQuery.trim()
+                            ? 'Không tìm thấy ghi chú phù hợp.'
+                            : 'Chưa có ghi chú nào. Hãy tạo ghi chú đầu tiên.'}
                     </div>
                 )}
 
                 {!loading && sortedNotes.map((note) => {
                     const isActive = note.id === selectedId;
-                    const preview = getPreviewText(note.content).slice(0, 80);
+                    const preview = getSearchPreview(note.content, searchQuery);
 
                     return (
                         <div
@@ -170,10 +252,17 @@ export default function NoteList({
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
                                         <p className="text-note-title text-apple-text-primary truncate">
-                                            {note.title || 'Ghi chú mới'}
+                                            <HighlightedText
+                                                text={note.title || 'Ghi chú mới'}
+                                                query={searchQuery}
+                                            />
                                         </p>
                                         <p className="text-note-caption text-apple-text-secondary truncate">
-                                            {preview || 'Nội dung đang trống'}
+                                            {preview ? (
+                                                <HighlightedText text={preview} query={searchQuery} />
+                                            ) : (
+                                                'Nội dung đang trống'
+                                            )}
                                         </p>
                                     </div>
                                     <span className="shrink-0 text-[11px] text-apple-text-secondary">

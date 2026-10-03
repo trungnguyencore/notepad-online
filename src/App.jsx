@@ -18,6 +18,27 @@ const RECENT_FOLDER = 'recent';
 const UNFILED_FOLDER = 'unfiled';
 const INSTAGRAM_URL = 'https://www.instagram.com/trunk.ng/';
 
+function getPlainText(content) {
+    if (!content) return '';
+    try {
+        const parsed = new DOMParser().parseFromString(content, 'text/html');
+        return parsed.body.textContent || '';
+    } catch {
+        return String(content).replace(/<[^>]*>/g, ' ');
+    }
+}
+
+function normalizeSearchText(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .toLocaleLowerCase('vi')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 export default function App() {
     const [syncKey, setSyncKey] = useState(() => localStorage.getItem(SYNC_KEY_STORAGE) || '');
     const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
@@ -27,6 +48,7 @@ export default function App() {
     const [selectedNoteId, setSelectedNoteId] = useState(null);
     const [showSyncModal, setShowSyncModal] = useState(!syncKey);
     const [pendingDeleteId, setPendingDeleteId] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const [folderDialog, setFolderDialog] = useState({ open: false, mode: 'create', folder: null });
 
     const { notes, loading, error, createNote, updateNote, setPinned, touchNoteOpened, deleteNote } = useNotes(syncKey);
@@ -42,6 +64,7 @@ export default function App() {
     useEffect(() => {
         setSelectedNoteId(null);
         setPendingDeleteId(null);
+        setSearchQuery('');
         setSelectedFolderId(window.matchMedia('(min-width: 1024px)').matches ? ALL_FOLDER : null);
         if (!syncKey) setShowSyncModal(true);
     }, [syncKey]);
@@ -80,6 +103,17 @@ export default function App() {
         return notes.filter(note => note.folderId === selectedFolderId);
     }, [notes, selectedFolderId]);
 
+    const normalizedSearchQuery = useMemo(() => normalizeSearchText(searchQuery), [searchQuery]);
+
+    const visibleNotes = useMemo(() => {
+        if (!normalizedSearchQuery) return filteredNotes;
+
+        return notes.filter((note) => {
+            const searchable = normalizeSearchText(`${note.title || ''} ${getPlainText(note.content)}`);
+            return searchable.includes(normalizedSearchQuery);
+        });
+    }, [filteredNotes, normalizedSearchQuery, notes]);
+
     useEffect(() => {
         if (selectedNoteId && !notes.some(note => note.id === selectedNoteId)) {
             setSelectedNoteId(null);
@@ -87,10 +121,10 @@ export default function App() {
         }
 
         if (!isDesktop || !selectedFolderId) return;
-        if (!selectedNoteId || !filteredNotes.some(note => note.id === selectedNoteId)) {
-            setSelectedNoteId(filteredNotes[0]?.id || null);
+        if (!selectedNoteId || !visibleNotes.some(note => note.id === selectedNoteId)) {
+            setSelectedNoteId(visibleNotes[0]?.id || null);
         }
-    }, [filteredNotes, isDesktop, notes, selectedFolderId, selectedNoteId]);
+    }, [isDesktop, notes, selectedFolderId, selectedNoteId, visibleNotes]);
 
     const selectedFolderName = useMemo(() => {
         if (selectedFolderId === ALL_FOLDER) return 'Tất cả ghi chú';
@@ -110,16 +144,19 @@ export default function App() {
     }, [syncKey]);
 
     const handleSelectFolder = useCallback((folderId) => {
+        setSearchQuery('');
         setSelectedFolderId(folderId);
         setSelectedNoteId(null);
     }, []);
 
     const handleBackToFolders = useCallback(() => {
+        setSearchQuery('');
         setSelectedNoteId(null);
         setSelectedFolderId(null);
     }, []);
 
     const handleCreateNote = useCallback(async () => {
+        setSearchQuery('');
         const folderId = selectedFolderId && ![ALL_FOLDER, RECENT_FOLDER, UNFILED_FOLDER].includes(selectedFolderId)
             ? selectedFolderId
             : null;
@@ -258,16 +295,19 @@ export default function App() {
 
                         <aside className={`${selectedFolderId && !selectedNoteId ? 'block' : 'hidden lg:block'} h-[calc(100dvh-180px)] min-h-[420px] rounded-2xl bg-apple-bg-secondary p-3 shadow-sm`}>
                             <NoteList
-                                notes={filteredNotes}
+                                notes={visibleNotes}
+                                totalNoteCount={notes.length}
                                 loading={loading}
                                 selectedId={selectedNoteId}
                                 title={selectedFolderName}
+                                searchQuery={searchQuery}
+                                onSearchChange={setSearchQuery}
                                 onBack={handleBackToFolders}
                                 onSelect={handleSelectNote}
                                 onCreate={handleCreateNote}
                                 onPin={handlePinNote}
                                 onDelete={handleDeleteNote}
-                                recentMode={selectedFolderId === RECENT_FOLDER}
+                                recentMode={selectedFolderId === RECENT_FOLDER && !normalizedSearchQuery}
                             />
                         </aside>
 
@@ -276,8 +316,14 @@ export default function App() {
                                 <div className="flex h-full items-center justify-center text-note-caption text-apple-text-secondary">
                                     Đang đồng bộ...
                                 </div>
-                            ) : filteredNotes.length === 0 ? (
-                                <EmptyState onCreate={handleCreateNote} />
+                            ) : visibleNotes.length === 0 ? (
+                                normalizedSearchQuery ? (
+                                    <div className="flex h-full items-center justify-center px-6 text-center text-note-caption text-apple-text-secondary">
+                                        Không tìm thấy ghi chú phù hợp.
+                                    </div>
+                                ) : (
+                                    <EmptyState onCreate={handleCreateNote} />
+                                )
                             ) : selectedNote ? (
                                 <NoteEditor
                                     note={selectedNote}
