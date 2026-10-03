@@ -183,9 +183,12 @@ export default function App() {
                 <div className="mx-auto max-w-[1400px] px-4 pb-[var(--safe-area-bottom)] pt-[var(--safe-area-top)] sm:px-6 lg:px-8">
                     <header className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-apple-accent text-black shadow-sm">
-                                <span className="text-[15px] font-semibold">N</span>
-                            </div>
+                            <img
+                                src="/notepad-logo.svg"
+                                alt=""
+                                aria-hidden="true"
+                                className="h-10 w-10 shrink-0 rounded-2xl shadow-sm"
+                            />
                             <div>
                                 <h1 className="text-[18px] font-semibold">Notepad Online</h1>
                                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-note-caption text-apple-text-secondary">
