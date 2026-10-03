@@ -1,8 +1,8 @@
 # PROJECT PROGRESS — GPT RESUME
 
-- Last verified: 2026-10-01
+- Last verified: 2026-10-03
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: Checklist/Task list đã deploy production và desktop/mobile production smoke PASS.
+- Current phase: Checklist/Task list vẫn production PASS. Compact editor header local visual-acceptance desktop + iPhone 393×852 PASS, final build PASS, isolated test cleanup=0; pending user rollout approval trước commit/push/deploy.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
@@ -64,8 +64,9 @@
 - Không có test/lint script canonical trong `package.json`.
 
 ## Next actions
-1. User acceptance checklist on real iPhone.
-2. Continue bundle optimization + Firestore Rules hardening.
-3. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
+1. User review compact editor header local đã visual-PASS; nếu duyệt thì commit/push/deploy và smoke production.
+2. User acceptance checklist on real iPhone.
+3. Continue bundle optimization + Firestore Rules hardening.
+4. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
 
 > Nếu mâu thuẫn, `docs\PROJECT_PROGRESS.md` và source/Git evidence mới hơn thắng.

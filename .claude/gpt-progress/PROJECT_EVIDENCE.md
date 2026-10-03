@@ -1,6 +1,6 @@
 # PROJECT EVIDENCE — Notepad Online
 
-- Last verified: 2026-10-01
+- Last verified: 2026-10-03
 - Canonical progress: `docs\PROJECT_PROGRESS.md`
 
 ## Verified source evidence
@@ -66,6 +66,16 @@
 - Production desktop smoke: create two task items `[false,false]`, first check `[true,false]`, reload `[true,false]`, toolbar 44×44, line-through verified, console=[] .
 - Production mobile 393×852 smoke: cold `[true,false]`, task-list markup present, second check `[true,true]`, reload `[true,true]`, toolbar 44×44, overflowX=0, nestedButtons=0, console=[] .
 - Production isolated test note deleted through UI; final note-card count = 0.
+
+## Compact header evidence — 2026-10-03
+- Local diff chỉ chạm `src/components/NoteEditor.jsx`, `src/components/FolderPicker.jsx`, `src/index.css` trước khi progress docs được cập nhật.
+- Folder picker đã nằm cùng metadata line; desktop dùng compact chip, mobile giữ min-height 44px.
+- H1/H2/H3 được thay bằng `TextStyleSelect` (`Aa`, H1, H2, H3); list/checklist/quote và B/I/U giữ nguyên.
+- Final `npm run build` PASS: 1705 modules; JS 818.69 kB minified / 232.53 kB gzip; chunk warning >500 kB vẫn còn.
+- Desktop local visual acceptance: viewport 1424×749, no page overflow, folder chip 32px, toolbar 44px một hàng.
+- iPhone emulation 393×852: no page overflow, folder chip 44px, toolbar 44px; horizontal swipe còn hoạt động nhưng scrollbar ẩn; Checklist nằm trong vùng nhìn thấy ngay sau `Aa`.
+- Mobile save metadata dùng `HH:mm · trạng thái`; desktop vẫn full date/time. Isolated visual-test Sync Key đã cleanup về 0 note.
+- Chưa commit/push/deploy; production chưa đổi.
 
 ## Still unverified
 - Firestore rule hardening beyond current Sync-Key model and PWA offline behavior remain open.

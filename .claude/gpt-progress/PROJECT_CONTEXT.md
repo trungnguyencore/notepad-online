@@ -8,7 +8,7 @@
 - Pre-mobile backup: `D:\OTHERS\LATVAT\notepad app online_backup_2026-09-21_pre_mobile`
 - Pre-folders backup: `D:\OTHERS\LATVAT\notepad app online_backup_2026-09-21_pre_folders`
 - Pre-checklist backup: `D:\OTHERS\LATVAT\notepad app online_backup_2026-10-01_pre_checklist`
-- Last verified: 2026-10-01
+- Last verified: 2026-10-03
 
 ## Source priority
 1. Source code và config thực tế trong `src\`, `public\`, root config.

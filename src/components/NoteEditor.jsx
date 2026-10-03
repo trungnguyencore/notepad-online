@@ -22,6 +22,15 @@ function formatDetailDate(value) {
     }).format(date);
 }
 
+function formatDetailTime(value) {
+    if (!value) return '';
+    const date = value instanceof Date ? value : new Date(value);
+    return new Intl.DateTimeFormat('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+    }).format(date);
+}
+
 function getTitleFromText(text) {
     const lines = String(text || '')
         .split('\n')
@@ -42,6 +51,38 @@ function ToolbarButton({ active, onClick, label, children }) {
         >
             {children}
         </button>
+    );
+}
+
+function TextStyleSelect({ editor }) {
+    const value = editor?.isActive('heading', { level: 1 })
+        ? 'h1'
+        : editor?.isActive('heading', { level: 2 })
+            ? 'h2'
+            : editor?.isActive('heading', { level: 3 })
+                ? 'h3'
+                : 'paragraph';
+
+    const handleChange = (event) => {
+        if (!editor) return;
+        const next = event.target.value;
+        if (next === 'paragraph') {
+            editor.chain().focus().setParagraph().run();
+            return;
+        }
+        editor.chain().focus().setHeading({ level: Number(next.slice(1)) }).run();
+    };
+
+    return (
+        <label className="toolbar-style-select" aria-label="Kiểu văn bản">
+            <span className="sr-only">Kiểu văn bản</span>
+            <select value={value} onChange={handleChange} aria-label="Kiểu văn bản">
+                <option value="paragraph">Aa</option>
+                <option value="h1">H1</option>
+                <option value="h2">H2</option>
+                <option value="h3">H3</option>
+            </select>
+        </label>
     );
 }
 
@@ -152,7 +193,7 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
 
     return (
         <div className="flex h-full flex-col">
-            <div className="flex flex-col gap-4 border-b border-apple-border pb-4">
+            <div className="flex flex-col gap-2 border-b border-apple-border pb-2">
                 <div className="flex items-start gap-2 sm:gap-4">
                     <button
                         type="button"
@@ -166,9 +207,19 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                         <h2 className="text-note-title text-apple-text-primary break-words">
                             {draftTitle || note.title || 'Ghi chú mới'}
                         </h2>
-                        <p className={`text-note-caption ${saveState === 'error' ? 'text-apple-danger' : 'text-apple-text-secondary'}`}>
-                            Cập nhật {formatDetailDate(note.updatedAt)} · {statusLabel}
-                        </p>
+                        <div className={`mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-note-caption ${saveState === 'error' ? 'text-apple-danger' : 'text-apple-text-secondary'}`}>
+                            <span className="sm:hidden">
+                                {formatDetailTime(note.updatedAt)} · {statusLabel}
+                            </span>
+                            <span className="hidden sm:inline">
+                                Cập nhật {formatDetailDate(note.updatedAt)} · {statusLabel}
+                            </span>
+                            <FolderPicker
+                                folders={folders}
+                                value={note.folderId || ''}
+                                onChange={(folderId) => onMoveFolder(note.id, folderId)}
+                            />
+                        </div>
                     </div>
                     <button
                         type="button"
@@ -180,15 +231,7 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                     </button>
                 </div>
 
-                <div className="flex items-center justify-between gap-3">
-                    <FolderPicker
-                        folders={folders}
-                        value={note.folderId || ''}
-                        onChange={(folderId) => onMoveFolder(note.id, folderId)}
-                    />
-                </div>
-
-                <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">
+                <div className="editor-toolbar flex gap-1.5 overflow-x-auto lg:flex-nowrap lg:overflow-visible">
                     <ToolbarButton
                         label="Bold"
                         active={editor?.isActive('bold')}
@@ -210,26 +253,13 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                     >
                         <UnderlineIcon size={16} />
                     </ToolbarButton>
+                    <TextStyleSelect editor={editor} />
                     <ToolbarButton
-                        label="Heading 1"
-                        active={editor?.isActive('heading', { level: 1 })}
-                        onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+                        label="Checklist"
+                        active={editor?.isActive('taskList')}
+                        onClick={() => editor?.chain().focus().toggleTaskList().run()}
                     >
-                        <span className="text-[11px] font-semibold">H1</span>
-                    </ToolbarButton>
-                    <ToolbarButton
-                        label="Heading 2"
-                        active={editor?.isActive('heading', { level: 2 })}
-                        onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                    >
-                        <span className="text-[11px] font-semibold">H2</span>
-                    </ToolbarButton>
-                    <ToolbarButton
-                        label="Heading 3"
-                        active={editor?.isActive('heading', { level: 3 })}
-                        onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
-                    >
-                        <span className="text-[11px] font-semibold">H3</span>
+                        <ListChecks size={17} />
                     </ToolbarButton>
                     <ToolbarButton
                         label="Bullet list"
@@ -246,13 +276,6 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                         <ListOrdered size={16} />
                     </ToolbarButton>
                     <ToolbarButton
-                        label="Checklist"
-                        active={editor?.isActive('taskList')}
-                        onClick={() => editor?.chain().focus().toggleTaskList().run()}
-                    >
-                        <ListChecks size={17} />
-                    </ToolbarButton>
-                    <ToolbarButton
                         label="Quote"
                         active={editor?.isActive('blockquote')}
                         onClick={() => editor?.chain().focus().toggleBlockquote().run()}
@@ -262,7 +285,7 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                 </div>
             </div>
 
-            <div className="mt-4 flex-1 overflow-y-auto">
+            <div className="mt-2 flex-1 overflow-y-auto">
                 <EditorContent editor={editor} className="min-h-[360px]" />
             </div>
         </div>
