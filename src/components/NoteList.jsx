@@ -1,5 +1,7 @@
-import React from 'react';
-import { ChevronLeft, Plus, Trash2 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { ChevronLeft, Pin, Plus, Trash2 } from 'lucide-react';
+
+const SORT_STORAGE = 'notepad-note-sort';
 
 function formatNoteDate(value) {
     if (!value) return '';
@@ -30,16 +32,56 @@ function getPreviewText(content) {
     }
 }
 
+function getTime(value) {
+    if (!value) return 0;
+    const date = value instanceof Date ? value : new Date(value);
+    const time = date.getTime();
+    return Number.isNaN(time) ? 0 : time;
+}
+
 export default function NoteList({
     notes,
     selectedId,
     onSelect,
     onCreate,
+    onPin,
     onDelete,
     onBack,
     title = 'Ghi chú',
     loading,
+    recentMode = false,
 }) {
+    const [sortMode, setSortMode] = useState(() => localStorage.getItem(SORT_STORAGE) || 'updated-desc');
+
+    const sortedNotes = useMemo(() => {
+        const items = [...notes];
+
+        if (recentMode) {
+            return items.sort((a, b) => getTime(b.lastOpenedAt) - getTime(a.lastOpenedAt));
+        }
+
+        return items.sort((a, b) => {
+            const pinnedDiff = Number(Boolean(b.pinned)) - Number(Boolean(a.pinned));
+            if (pinnedDiff !== 0) return pinnedDiff;
+
+            if (sortMode === 'updated-asc') {
+                return getTime(a.updatedAt) - getTime(b.updatedAt);
+            }
+
+            if (sortMode === 'title-asc') {
+                return String(a.title || '').localeCompare(String(b.title || ''), 'vi', { sensitivity: 'base' });
+            }
+
+            return getTime(b.updatedAt) - getTime(a.updatedAt);
+        });
+    }, [notes, recentMode, sortMode]);
+
+    const handleSortChange = (event) => {
+        const next = event.target.value;
+        setSortMode(next);
+        localStorage.setItem(SORT_STORAGE, next);
+    };
+
     return (
         <div className="flex h-full flex-col">
             <div className="flex items-center gap-2 px-1">
@@ -69,7 +111,27 @@ export default function NoteList({
                 </button>
             </div>
 
-            <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
+            <div className="mt-2 flex min-h-9 items-center justify-end px-1">
+                {recentMode ? (
+                    <span className="text-[12px] text-apple-text-secondary">{notes.length} ghi chú mở gần nhất</span>
+                ) : (
+                    <label className="inline-flex items-center rounded-lg bg-apple-bg-tertiary px-2 text-[12px] text-apple-text-secondary">
+                        <span className="sr-only">Sắp xếp ghi chú</span>
+                        <select
+                            value={sortMode}
+                            onChange={handleSortChange}
+                            className="h-11 bg-transparent pr-1 text-[12px] text-apple-text-primary outline-none"
+                            aria-label="Sắp xếp ghi chú"
+                        >
+                            <option value="updated-desc">Mới sửa</option>
+                            <option value="updated-asc">Cũ nhất</option>
+                            <option value="title-asc">A–Z</option>
+                        </select>
+                    </label>
+                )}
+            </div>
+
+            <div className="mt-3 flex-1 space-y-3 overflow-y-auto pr-1">
                 {loading && (
                     <div className="space-y-3">
                         {[0, 1, 2].map((index) => (
@@ -87,7 +149,7 @@ export default function NoteList({
                     </div>
                 )}
 
-                {!loading && notes.map((note) => {
+                {!loading && sortedNotes.map((note) => {
                     const isActive = note.id === selectedId;
                     const preview = getPreviewText(note.content).slice(0, 80);
 
@@ -119,14 +181,25 @@ export default function NoteList({
                                     </span>
                                 </div>
                             </button>
-                            <button
-                                type="button"
-                                onClick={() => onDelete(note.id)}
-                                className="m-1 flex w-11 shrink-0 items-center justify-center rounded-xl text-apple-text-secondary hover:text-apple-danger hover:bg-apple-bg-tertiary active:scale-95 transition"
-                                aria-label={`Xóa ${note.title || 'ghi chú'}`}
-                            >
-                                <Trash2 size={17} />
-                            </button>
+                            <div className="flex shrink-0 items-stretch p-1">
+                                <button
+                                    type="button"
+                                    onClick={() => onPin(note.id, !note.pinned)}
+                                    className={`flex w-11 items-center justify-center rounded-xl hover:bg-apple-bg-tertiary active:scale-95 transition ${note.pinned ? 'text-apple-accent' : 'text-apple-text-secondary'}`}
+                                    aria-label={note.pinned ? `Bỏ ghim ${note.title || 'ghi chú'}` : `Ghim ${note.title || 'ghi chú'}`}
+                                    aria-pressed={note.pinned ? 'true' : 'false'}
+                                >
+                                    <Pin size={17} className={note.pinned ? 'fill-current' : ''} />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => onDelete(note.id)}
+                                    className="flex w-11 items-center justify-center rounded-xl text-apple-text-secondary hover:text-apple-danger hover:bg-apple-bg-tertiary active:scale-95 transition"
+                                    aria-label={`Xóa ${note.title || 'ghi chú'}`}
+                                >
+                                    <Trash2 size={17} />
+                                </button>
+                            </div>
                         </div>
                     );
                 })}

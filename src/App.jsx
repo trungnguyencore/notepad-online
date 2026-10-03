@@ -14,6 +14,7 @@ import ThemeToggle from './components/ThemeToggle';
 
 const SYNC_KEY_STORAGE = 'notepad-sync-key';
 const ALL_FOLDER = 'all';
+const RECENT_FOLDER = 'recent';
 const UNFILED_FOLDER = 'unfiled';
 const INSTAGRAM_URL = 'https://www.instagram.com/trunk.ng/';
 
@@ -28,7 +29,7 @@ export default function App() {
     const [pendingDeleteId, setPendingDeleteId] = useState(null);
     const [folderDialog, setFolderDialog] = useState({ open: false, mode: 'create', folder: null });
 
-    const { notes, loading, error, createNote, updateNote, deleteNote } = useNotes(syncKey);
+    const { notes, loading, error, createNote, updateNote, setPinned, touchNoteOpened, deleteNote } = useNotes(syncKey);
     const {
         folders,
         loading: foldersLoading,
@@ -59,7 +60,7 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        if (!selectedFolderId || selectedFolderId === ALL_FOLDER || selectedFolderId === UNFILED_FOLDER) return;
+        if (!selectedFolderId || [ALL_FOLDER, RECENT_FOLDER, UNFILED_FOLDER].includes(selectedFolderId)) return;
         if (foldersLoading) return;
         if (!folders.some(folder => folder.id === selectedFolderId)) {
             setSelectedFolderId(isDesktop ? ALL_FOLDER : null);
@@ -69,6 +70,12 @@ export default function App() {
 
     const filteredNotes = useMemo(() => {
         if (!selectedFolderId || selectedFolderId === ALL_FOLDER) return notes;
+        if (selectedFolderId === RECENT_FOLDER) {
+            return notes
+                .filter(note => note.lastOpenedAt)
+                .sort((a, b) => b.lastOpenedAt.getTime() - a.lastOpenedAt.getTime())
+                .slice(0, 10);
+        }
         if (selectedFolderId === UNFILED_FOLDER) return notes.filter(note => !note.folderId);
         return notes.filter(note => note.folderId === selectedFolderId);
     }, [notes, selectedFolderId]);
@@ -87,6 +94,7 @@ export default function App() {
 
     const selectedFolderName = useMemo(() => {
         if (selectedFolderId === ALL_FOLDER) return 'Tất cả ghi chú';
+        if (selectedFolderId === RECENT_FOLDER) return 'Gần đây';
         if (selectedFolderId === UNFILED_FOLDER) return 'Chưa phân loại';
         return folders.find(folder => folder.id === selectedFolderId)?.name || 'Ghi chú';
     }, [folders, selectedFolderId]);
@@ -112,7 +120,7 @@ export default function App() {
     }, []);
 
     const handleCreateNote = useCallback(async () => {
-        const folderId = selectedFolderId && ![ALL_FOLDER, UNFILED_FOLDER].includes(selectedFolderId)
+        const folderId = selectedFolderId && ![ALL_FOLDER, RECENT_FOLDER, UNFILED_FOLDER].includes(selectedFolderId)
             ? selectedFolderId
             : null;
         const newId = await createNote('Ghi chú mới', '', folderId);
@@ -122,11 +130,20 @@ export default function App() {
     const handleMoveNoteFolder = useCallback(async (noteId, folderId) => {
         const normalizedFolderId = folderId || null;
         const ok = await updateNote(noteId, { folderId: normalizedFolderId });
-        if (ok && selectedFolderId !== ALL_FOLDER) {
+        if (ok && ![ALL_FOLDER, RECENT_FOLDER].includes(selectedFolderId)) {
             setSelectedFolderId(normalizedFolderId || UNFILED_FOLDER);
         }
         return ok;
     }, [selectedFolderId, updateNote]);
+
+    const handleSelectNote = useCallback((noteId) => {
+        setSelectedNoteId(noteId);
+        void touchNoteOpened(noteId);
+    }, [touchNoteOpened]);
+
+    const handlePinNote = useCallback((noteId, pinned) => {
+        void setPinned(noteId, pinned);
+    }, [setPinned]);
 
     const handleDeleteNote = useCallback((noteId) => {
         setPendingDeleteId(noteId);
@@ -246,9 +263,11 @@ export default function App() {
                                 selectedId={selectedNoteId}
                                 title={selectedFolderName}
                                 onBack={handleBackToFolders}
-                                onSelect={setSelectedNoteId}
+                                onSelect={handleSelectNote}
                                 onCreate={handleCreateNote}
+                                onPin={handlePinNote}
                                 onDelete={handleDeleteNote}
+                                recentMode={selectedFolderId === RECENT_FOLDER}
                             />
                         </aside>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Folder, Inbox, List, Pencil, Plus } from 'lucide-react';
+import { Clock3, Folder, Inbox, List, Pencil, Plus } from 'lucide-react';
 
 function FolderRow({ label, count, active, icon: Icon, onSelect, onRename }) {
   return (
@@ -38,6 +38,7 @@ export default function FolderList({
   onRename,
 }) {
   const unfiledCount = notes.filter(note => !note.folderId).length;
+  const recentCount = Math.min(notes.filter(note => note.lastOpenedAt).length, 10);
 
   return (
     <div className="flex h-full flex-col">
@@ -65,6 +66,13 @@ export default function FolderList({
           active={selectedFolderId === 'all'}
           icon={List}
           onSelect={() => onSelect('all')}
+        />
+        <FolderRow
+          label="Gần đây"
+          count={recentCount}
+          active={selectedFolderId === 'recent'}
+          icon={Clock3}
+          onSelect={() => onSelect('recent')}
         />
         <FolderRow
           label="Chưa phân loại"

@@ -46,8 +46,10 @@ export function useNotes(syncKey) {
         const items = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
+          pinned: Boolean(doc.data().pinned),
           createdAt: doc.data().createdAt?.toDate?.() || new Date(),
           updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
+          lastOpenedAt: doc.data().lastOpenedAt?.toDate?.() || null,
         }));
         setNotes(items);
         setLoading(false);
@@ -85,8 +87,10 @@ export function useNotes(syncKey) {
         title,
         content,
         folderId: folderId || null,
+        pinned: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        lastOpenedAt: serverTimestamp(),
       });
       return docRef.id;
     } catch (err) {
@@ -110,6 +114,30 @@ export function useNotes(syncKey) {
     }
   }, []);
 
+  const setPinned = useCallback(async (noteId, pinned) => {
+    if (!hashRef.current) return false;
+    try {
+      const noteRef = doc(db, 'sync_data', hashRef.current, 'notes', noteId);
+      await updateDoc(noteRef, { pinned: Boolean(pinned) });
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    }
+  }, []);
+
+  const touchNoteOpened = useCallback(async (noteId) => {
+    if (!hashRef.current) return false;
+    try {
+      const noteRef = doc(db, 'sync_data', hashRef.current, 'notes', noteId);
+      await updateDoc(noteRef, { lastOpenedAt: serverTimestamp() });
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    }
+  }, []);
+
   const deleteNote = useCallback(async (noteId) => {
     if (!hashRef.current) return;
     try {
@@ -120,5 +148,14 @@ export function useNotes(syncKey) {
     }
   }, []);
 
-  return { notes, loading, error, createNote, updateNote, deleteNote };
+  return {
+    notes,
+    loading,
+    error,
+    createNote,
+    updateNote,
+    setPinned,
+    touchNoteOpened,
+    deleteNote,
+  };
 }
