@@ -1,0 +1,14 @@
+Firebase CLI 15.30.2 — terminal deployment result, 2026-10-31 +07:00
+Command: node <cached firebase-tools>/lib/bin/firebase.js deploy --only firestore:rules --project notepad-app-6845e --non-interactive
+
++ cloud.firestore: rules file firestore.rules compiled successfully
+[rules] created ruleset projects/notepad-app-6845e/rulesets/c0337244-8e5e-4e38-b0c4-9137f36a1f48
+[rules] releasing cloud.firestore with ruleset projects/notepad-app-6845e/rulesets/c0337244-8e5e-4e38-b0c4-9137f36a1f48
+PATCH https://firebaserules.googleapis.com/v1/projects/notepad-app-6845e/releases/cloud.firestore -> 200
+Release updateTime: 2026-10-31T06:27:43.307872Z
+[rules] updated release projects/notepad-app-6845e/releases/cloud.firestore
++ firestore: released rules firestore.rules to cloud.firestore
++ Deploy complete!
+
+Previous ruleset read by CLI before release: projects/notepad-app-6845e/rulesets/280fb63d-5def-4ee3-8455-2f86d37fb837
+Credentials and OAuth logs omitted. Full automatic firebase-debug.log stays ignored locally.

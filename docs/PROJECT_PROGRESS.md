@@ -1,8 +1,8 @@
 # PROJECT PROGRESS — Notepad Online
 
-- **Last verified:** 2026-10-03
+- **Last verified:** 2026-10-31 (production rollout + live smoke PASS)
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** Global note search đã rollout production PASS trên nền Pin + Sort + Recent. Feature commit `f5cdc7b` đã push `main`; Vercel deployment `notepad-online-pzux3i19u-trunknguen.vercel.app` Ready; production alias phục vụ đúng bundle `assets/index-Ci2FaFSR.js`. Desktop + iPhone 393×852 smoke PASS; title/body search, accent-insensitive match, highlight, clear, touch targets và isolated cleanup đều verified.
+- **Status:** Folder delete giữ notes + checklist repair đã rollout production PASS. Feature `2632f60` pushed main; Vercel `2fp75o1w8` Ready; production alias phục vụ exact local bundle `index-BLTcuew3.js`. Firebase rules compile/release PASS; actual Firebase smoke 10/10 local + 10/10 production PASS; test cleanup notes=0/folders=0 trên cả hai workspace. Xem section 5J và `docs/qa/2026-10-31/HANDOFF.md`.
 - **Backlog:** `docs\TODOLIST.md`
 - **AI rules:** `.claude\CLAUDE.md`
 
@@ -188,16 +188,41 @@ notepad app online/
 - Production desktop + iPhone 393×852 smoke reproduced global title/body search, no-accent match, highlight, clear behavior và 44px mobile targets; console SEVERE=[] .
 - Isolated Sync Key SHA-256 root `06e4629db15f4d840ff1a80393fe354c07fc596c10aacbed53238ce8c51aff57` cleanup via Firebase CLI exit 0; final production readback = 0 note cards / 0 editor.
 
+## 5I. Folder delete + checklist repair — 2026-10-31 — LOCAL ONLY
+
+- User duyệt triển khai local; không có yêu cầu commit/push/deploy.
+- Added folder delete control + confirm + busy/error state. Chuyển `folderId` về null trong transaction tối đa 200 notes/lượt; đọc lại từng note để tránh ghi đè thao tác chuyển folder đồng thời. Chỉ ghi `folderId`, không đổi content/title/pinned/lastOpenedAt/updatedAt. Đọc server lần cuối; nếu có note mới thì giữ folder và báo thử lại. Sau đó mới xóa folder metadata.
+- Nếu một transaction sau bị lỗi, những note đã chuyển vẫn ở Unfiled và folder được giữ; đây không phải thao tác atomic cho toàn bộ folder lớn. Reference tới folder đã mất được hiển thị trong Unfiled, kể cả stale client tạo note sau bước kiểm tra cuối. Không cascade-delete notes.
+- `firestore.rules` local cho phép delete folder theo trust model hiện có. Rules trên server CHƯA deploy/compile bằng emulator trong lượt này; production rules cuối cùng được ghi nhận vẫn deny folder delete.
+- Checklist baseline tái hiện CSS selector quá rộng làm nested bullet thành flex và checked parent gạch ngang toàn bộ child container; đã sửa selector chỉ áp dụng task item trực tiếp, strike chỉ áp dụng paragraph của item checked. Mobile checkbox label 44×44; wrap URL dài.
+- Editor được key theo workspace/note để cô lập draft khi đổi note; trạng thái Đã lưu chỉ cập nhật nếu phiên bản draft khớp lượt save. Không migration hoặc viết lại HTML note cũ; không thêm custom Enter/Backspace behavior.
+- Thêm/xóa dòng bằng Enter/Backspace/Delete, xóa vùng chọn nhiều dòng, undo, indent/outdent, fast-switch và mở lại qua local store PASS. Chưa tái hiện được mất nội dung trong các ca đó; không khẳng định đã xác định toàn bộ nguyên nhân báo lỗi của user.
+- Evidence: `docs/qa/2026-10-31/baseline.json` (10 checks trước sửa, 3 lỗi layout/touch), `after.json` (25/25 PASS; browser SEVERE=[]), `after.png`, `after-folder.png`. Mobile sau sửa dùng CDP metrics, xác nhận innerWidth=393, height=852; ảnh baseline dùng desktop window, không phải xác nhận iPhone thật.
+- Browser suite dùng actual React components/hooks với in-memory Firestore double; không gọi Firebase thật, không ghi dữ liệu user. Không xác minh network/retry/security-rules semantics của Firebase bằng mock.
+- Final build command `npm run build -- --outDir dist-review-20261031` PASS, Vite 6.4.2, 1705 modules; JS 837.27 kB / gzip 236.91 kB. Bundle `index-BLTcuew3.js`; warning >500 kB còn. Log `docs/qa/2026-10-31/build.txt`; giữ nguyên `dist/` cũ.
+- Git base `155400d` trên main, working tree sạch trước task; kết thúc task còn diff local. Backup trước sửa: `C:\Users\admin\AppData\Local\Temp\notepad-before-20261031-131004`; không chứa `.env`.
+
+## 5J. Rollout — 2026-10-31 — PRODUCTION PASS
+
+- User báo bản local ổn, chỉ còn `Missing or insufficient permissions` khi xóa folder, và yêu cầu deploy. Đây là phê duyệt rollout sau local review, thay thế trạng thái local-only của section 5I.
+- Firebase CLI 15.30.2 đã compile + release `firestore.rules` lên project `notepad-app-6845e` lúc 13:27:43 +07:00. Ruleset mới `c0337244-8e5e-4e38-b0c4-9137f36a1f48`; ruleset trước `280fb63d-5def-4ee3-8455-2f86d37fb837`. Evidence lọc không chứa credential: `docs/qa/2026-10-31/rules-deploy.txt`.
+- `scripts/qa/live_smoke.py` chạy với actual app localhost:3000 + Firebase thật, generated disposable Sync Key: 10/10 checks PASS. Xóa folder giữ toàn bộ fields của note trừ folderId (bao gồm updatedAt/pinned/content), cancel, checklist add/remove/checked persistence, desktop/mobile cold reload và empty folder delete PASS. Backend REST readback độc lập; cleanup notes=0/folders=0. Report `live-local.json`, screenshot `live-local.png`; browser SEVERE=[].
+- Vercel production trước rollout được inspect live: deployment `notepad-online-7ua8uerzr-trunknguen.vercel.app` Ready, created 2026-10-03 17:51:02 +07:00. Khác deployment feature `pzux3i19u` trong note cũ; chưa coi frontend mới đã rollout.
+- Feature commit `2632f60` đã push GitHub main. Vercel `notepad-online-2fp75o1w8-trunknguen.vercel.app` Ready, created 2026-10-31 13:30:48 +07:00; production alias `https://notepad-online-beta.vercel.app` updated.
+- Production alias served `/assets/index-BLTcuew3.js`, 837270 bytes, SHA256 `6f5c45586e06229da293b65748b4bb93afc1e6e9463e8280dcba2a3c0b8a8d1b`, byte-for-byte equal to reviewed local build. Evidence `production-bundle.json`.
+- `live-production.json`: 10/10 live production checks PASS; no error, browser SEVERE=[]; independent REST readback verifies folder deletion changes only folderId and retains note/checklist/pin/timestamps. Desktop reload, 393×852 mobile checked-state cold reload + 44px targets/no overflow, mobile empty-folder delete and UI test-note deletion PASS. `live-production.png` inspected. Test workspace cleanup notes=0/folders=0.
+- User acceptance: user reviewed localhost and reported only the rules permission failure before rollout; rules issue now resolved by live Firebase tests. Still do not claim physical-iPhone acceptance or all possible simultaneous-edit/data-loss causes fixed.
+
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
-Global Search, Pin + Sort + Recent, compact header, checklist, folder flows và branding logo hiện đều production PASS. Bundle/code-splitting, Firestore Rules hardening, toast/shortcuts và Apple Notes Sync + Vault vẫn còn backlog.
+Folder delete + checklist repair production PASS ngày 2026-10-31; physical-iPhone original-symptom acceptance còn chờ. Global Search, Pin + Sort + Recent, compact header, folder create/rename và branding logo giữ evidence rollout trước đó. Bundle/code-splitting, Firestore Rules hardening, toast/shortcuts và Apple Notes Sync + Vault vẫn còn backlog.
 
 ## 7. Next actions
 
 1. User acceptance Global Search + Pin + Sort + Recent (cùng compact header/checklist) trên iPhone thật.
 2. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
-3. Folder delete chưa có trong v1; nếu thêm sau phải chuyển notes về `Chưa phân loại`, không cascade-delete notes.
+3. User thử lại folder delete + thao tác checklist gây lỗi trên thiết bị thật. Rollout rules/frontend và live production smoke đã hoàn tất; không auto-deploy thêm tính năng.
 4. Tiếp tục backlog feature (toast/keyboard shortcuts...); Apple Notes Sync + Vault giữ ở future design cho tới khi user bắt đầu phase đó.
 
 ## 8. Archive rule
@@ -207,6 +232,10 @@ Không chỉnh sửa, move, rename hoặc xóa folder này.
 Mọi công việc Notepad mặc định phải thực hiện ở project hiện tại.
 
 ## 9. Changelog
+
+- 2026-10-31: User duyệt rollout sau localhost review; Firebase rules compile/release PASS; feature `2632f60` push main → Vercel `2fp75o1w8` Ready → exact-bundle verification + production live smoke 10/10 PASS; cleanup=0.
+
+- 2026-10-31: Local folder delete giữ notes, bounded transactions/concurrent-move checks, orphan fallback, checklist CSS/touch repair + save-status guard; 25 isolated browser checks + build PASS; chưa deploy. Chi tiết section 5I.
 
 - 2026-09-21: Chuẩn hóa documentation layout; chuyển `PROGRESS.md` thành `docs\PROJECT_PROGRESS.md`, chuyển `TODOLIST.md` vào `docs\`, tạo `.claude\CLAUDE.md` và `.claude\gpt-progress\` chuẩn DFT/CTRR.
 - 2026-09-21: Refresh state theo source/Git thực tế; loại bỏ các mô tả stale rằng React components chưa được tạo.

@@ -1,7 +1,24 @@
 # PROJECT EVIDENCE — Notepad Online
 
-- Last verified: 2026-10-03
+- Last verified: 2026-10-31 production; older rollout sections below are historical
 - Canonical progress: `docs\PROJECT_PROGRESS.md`
+
+## Production rollout — 2026-10-31
+
+- Rules CLI compile/release PASS, ruleset `c0337244-8e5e-4e38-b0c4-9137f36a1f48`; `rules-deploy.txt`.
+- Feature `2632f60` pushed main; Vercel deployment `notepad-online-2fp75o1w8-trunknguen.vercel.app` Ready, production alias updated.
+- `production-bundle.json`: alias JS `index-BLTcuew3.js`, exact bytes equal to local reviewed build, SHA256 `6f5c45586e06229da293b65748b4bb93afc1e6e9463e8280dcba2a3c0b8a8d1b`.
+- `live-local.json` + `live-production.json`: each 10/10 actual app/Firebase checks PASS, independent REST readback, no error, SEVERE=[], each disposable test workspace cleanup notes=0/folders=0.
+- `live-production.png` viewed directly: 393×852 mobile emulation, checked states persist cold reload; does not prove physical-iPhone acceptance.
+
+## Initial local folder delete + checklist repair — 2026-10-31 (before rollout)
+
+- `docs/qa/2026-10-31/baseline.json`: 10 checks trước sửa; nested bullet display, inherited checked decoration và small mobile label FAIL. Baseline window không phải iPhone thật.
+- `docs/qa/2026-10-31/after.json`: 25/25 PASS; SEVERE=[]; source components/hooks thật + in-memory Firestore double. Final mobile measurements use CDP width=393/height=852.
+- `after.png` + `after-folder.png` trong cùng evidence folder đã xem trực tiếp; checklist light + folder confirmation dark ở 393×852.
+- `build.txt`: 1705 modules; JS 837.27 kB / gzip 236.91 kB; bundle `index-BLTcuew3.js`; warning >500 kB còn. Build ra `dist-review-20261031`, không ghi đè `dist/` cũ.
+- Source diff: App/FolderList/ConfirmDialog/useFolders/NoteEditor/index.css/firestore.rules; no dependency change, no note HTML migration.
+- Không Firebase thật, không user-note writes, không rules emulator compile, không commit/push/deploy. Handoff và next steps: `docs/qa/2026-10-31/HANDOFF.md`.
 
 ## Verified source evidence
 - `src\App.jsx`: root layout, Sync Key state, folder/note selection, desktop 3-pane/mobile 3-step navigation và `@trunk.ng` attribution.

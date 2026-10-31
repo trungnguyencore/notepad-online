@@ -1,0 +1,164 @@
+{
+  "url": "https://notepad-online-beta.vercel.app/",
+  "root": "be57968a3a71a92b641f6d38124a65c4b93e8046660cc02971aad2f6f7045f52",
+  "results": [
+    {
+      "name": "isolated_workspace_starts_empty",
+      "pass": true,
+      "evidence": {
+        "root": "be57968a3a71a92b641f6d38124a65c4b93e8046660cc02971aad2f6f7045f52"
+      }
+    },
+    {
+      "name": "add_and_remove_empty_task_preserves_rows",
+      "pass": true,
+      "evidence": [
+        {
+          "checked": "true",
+          "text": "buoi1"
+        },
+        {
+          "checked": "false",
+          "text": "buoi2"
+        },
+        {
+          "checked": "false",
+          "text": "buoi3"
+        }
+      ]
+    },
+    {
+      "name": "checklist_saved_to_real_firestore",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "cancel_keeps_live_folder",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "delete_folder_keeps_all_note_fields_except_folderId",
+      "pass": true,
+      "evidence": {
+        "before": {
+          "content": {
+            "stringValue": "<p>QA deploy checklist</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p><p></p></div></li></ul>"
+          },
+          "title": {
+            "stringValue": "QA deploy checklist"
+          },
+          "updatedAt": {
+            "timestampValue": "2026-10-31T06:31:45.367Z"
+          },
+          "pinned": {
+            "booleanValue": true
+          },
+          "createdAt": {
+            "timestampValue": "2026-10-31T06:31:42.976Z"
+          },
+          "lastOpenedAt": {
+            "timestampValue": "2026-10-31T06:31:42.976Z"
+          },
+          "folderId": {
+            "stringValue": "PwUyk7if1RwkuoDIlbsb"
+          }
+        },
+        "after": {
+          "pinned": {
+            "booleanValue": true
+          },
+          "createdAt": {
+            "timestampValue": "2026-10-31T06:31:42.976Z"
+          },
+          "folderId": {
+            "nullValue": null
+          },
+          "updatedAt": {
+            "timestampValue": "2026-10-31T06:31:45.367Z"
+          },
+          "lastOpenedAt": {
+            "timestampValue": "2026-10-31T06:31:42.976Z"
+          },
+          "content": {
+            "stringValue": "<p>QA deploy checklist</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p><p></p></div></li></ul>"
+          },
+          "title": {
+            "stringValue": "QA deploy checklist"
+          }
+        }
+      }
+    },
+    {
+      "name": "desktop_reload_preserves_checked_states",
+      "pass": true,
+      "evidence": [
+        {
+          "checked": "true",
+          "text": "buoi1"
+        },
+        {
+          "checked": "true",
+          "text": "buoi2"
+        },
+        {
+          "checked": "false",
+          "text": "buoi3"
+        }
+      ]
+    },
+    {
+      "name": "production_mobile_layout",
+      "pass": true,
+      "evidence": {
+        "height": 852,
+        "nested": 0,
+        "overflow": false,
+        "targetHeight": 44,
+        "viewport": 393,
+        "width": 44
+      }
+    },
+    {
+      "name": "mobile_checkbox_persists_cold_reload",
+      "pass": true,
+      "evidence": [
+        {
+          "checked": "true",
+          "text": "buoi1"
+        },
+        {
+          "checked": "true",
+          "text": "buoi2"
+        },
+        {
+          "checked": "true",
+          "text": "buoi3"
+        }
+      ]
+    },
+    {
+      "name": "mobile_empty_folder_delete",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "ui_test_note_cleanup",
+      "pass": true,
+      "evidence": null
+    }
+  ],
+  "error": null,
+  "cleanup": {
+    "notes": 0,
+    "folders": 0
+  },
+  "console": [],
+  "capabilities": {
+    "browser": "156.0.8078.74",
+    "driver": "154.0.8037.92 (334b65d254ccc35df4fca82706d1753227b01039-refs/branch-heads/8037@{#1589})"
+  },
+  "scripts": [
+    "/assets/index-BLTcuew3.js"
+  ]
+}

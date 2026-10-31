@@ -1,0 +1,256 @@
+{
+  "url": "http://127.0.0.1:3000/",
+  "root": "828e3ac30591f43947a54444c1c20263bbc271a5f4dc4e1042a38a66537553e9",
+  "results": [
+    {
+      "name": "isolated_workspace_starts_empty",
+      "pass": true,
+      "evidence": {
+        "root": "828e3ac30591f43947a54444c1c20263bbc271a5f4dc4e1042a38a66537553e9"
+      }
+    },
+    {
+      "name": "add_and_remove_empty_task_preserves_rows",
+      "pass": true,
+      "evidence": [
+        {
+          "checked": "true",
+          "text": "buoi1"
+        },
+        {
+          "checked": "false",
+          "text": "buoi2"
+        },
+        {
+          "checked": "false",
+          "text": "buoi3"
+        }
+      ]
+    },
+    {
+      "name": "checklist_saved_to_real_firestore",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "cancel_keeps_live_folder",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "delete_folder_keeps_all_note_fields_except_folderId",
+      "pass": true,
+      "evidence": {
+        "before": {
+          "folderId": {
+            "stringValue": "j9xTn7Hgbbs6xc9NNDk6"
+          },
+          "createdAt": {
+            "timestampValue": "2026-10-31T06:29:05.716Z"
+          },
+          "updatedAt": {
+            "timestampValue": "2026-10-31T06:29:08.380Z"
+          },
+          "title": {
+            "stringValue": "QA deploy checklist"
+          },
+          "pinned": {
+            "booleanValue": true
+          },
+          "content": {
+            "stringValue": "<p>QA deploy checklist</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p><p></p></div></li></ul>"
+          },
+          "lastOpenedAt": {
+            "timestampValue": "2026-10-31T06:29:05.716Z"
+          }
+        },
+        "after": {
+          "folderId": {
+            "nullValue": null
+          },
+          "updatedAt": {
+            "timestampValue": "2026-10-31T06:29:08.380Z"
+          },
+          "pinned": {
+            "booleanValue": true
+          },
+          "title": {
+            "stringValue": "QA deploy checklist"
+          },
+          "content": {
+            "stringValue": "<p>QA deploy checklist</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p><p></p></div></li></ul>"
+          },
+          "createdAt": {
+            "timestampValue": "2026-10-31T06:29:05.716Z"
+          },
+          "lastOpenedAt": {
+            "timestampValue": "2026-10-31T06:29:05.716Z"
+          }
+        }
+      }
+    },
+    {
+      "name": "desktop_reload_preserves_checked_states",
+      "pass": true,
+      "evidence": [
+        {
+          "checked": "true",
+          "text": "buoi1"
+        },
+        {
+          "checked": "true",
+          "text": "buoi2"
+        },
+        {
+          "checked": "false",
+          "text": "buoi3"
+        }
+      ]
+    },
+    {
+      "name": "production_mobile_layout",
+      "pass": true,
+      "evidence": {
+        "height": 852,
+        "nested": 0,
+        "overflow": false,
+        "targetHeight": 44,
+        "viewport": 393,
+        "width": 44
+      }
+    },
+    {
+      "name": "mobile_checkbox_persists_cold_reload",
+      "pass": true,
+      "evidence": [
+        {
+          "checked": "true",
+          "text": "buoi1"
+        },
+        {
+          "checked": "true",
+          "text": "buoi2"
+        },
+        {
+          "checked": "true",
+          "text": "buoi3"
+        }
+      ]
+    },
+    {
+      "name": "mobile_empty_folder_delete",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "ui_test_note_cleanup",
+      "pass": true,
+      "evidence": null
+    }
+  ],
+  "error": null,
+  "cleanup": {
+    "notes": 0,
+    "folders": 0
+  },
+  "console": [
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 788:8 \"[vite] connecting...\"",
+      "source": "console-api",
+      "timestamp": 1793428144210
+    },
+    {
+      "level": "INFO",
+      "message": "http://127.0.0.1:3000/node_modules/.vite/deps/chunk-NXESFFTV.js?v=14cfb503 21608:24 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+      "source": "console-api",
+      "timestamp": 1793428144225
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 911:14 \"[vite] connected.\"",
+      "source": "console-api",
+      "timestamp": 1793428144291
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 788:8 \"[vite] connecting...\"",
+      "source": "console-api",
+      "timestamp": 1793428144356
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 911:14 \"[vite] connected.\"",
+      "source": "console-api",
+      "timestamp": 1793428144364
+    },
+    {
+      "level": "INFO",
+      "message": "http://127.0.0.1:3000/node_modules/.vite/deps/chunk-NXESFFTV.js?v=14cfb503 21608:24 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+      "source": "console-api",
+      "timestamp": 1793428144366
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 788:8 \"[vite] connecting...\"",
+      "source": "console-api",
+      "timestamp": 1793428150745
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 911:14 \"[vite] connected.\"",
+      "source": "console-api",
+      "timestamp": 1793428150749
+    },
+    {
+      "level": "INFO",
+      "message": "http://127.0.0.1:3000/node_modules/.vite/deps/chunk-NXESFFTV.js?v=14cfb503 21608:24 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+      "source": "console-api",
+      "timestamp": 1793428150755
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 788:8 \"[vite] connecting...\"",
+      "source": "console-api",
+      "timestamp": 1793428151329
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 911:14 \"[vite] connected.\"",
+      "source": "console-api",
+      "timestamp": 1793428151333
+    },
+    {
+      "level": "INFO",
+      "message": "http://127.0.0.1:3000/node_modules/.vite/deps/chunk-NXESFFTV.js?v=14cfb503 21608:24 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+      "source": "console-api",
+      "timestamp": 1793428151358
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 788:8 \"[vite] connecting...\"",
+      "source": "console-api",
+      "timestamp": 1793428152811
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3000/@vite/client 911:14 \"[vite] connected.\"",
+      "source": "console-api",
+      "timestamp": 1793428152814
+    },
+    {
+      "level": "INFO",
+      "message": "http://127.0.0.1:3000/node_modules/.vite/deps/chunk-NXESFFTV.js?v=14cfb503 21608:24 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+      "source": "console-api",
+      "timestamp": 1793428152823
+    }
+  ],
+  "capabilities": {
+    "browser": "156.0.8078.74",
+    "driver": "154.0.8037.92 (334b65d254ccc35df4fca82706d1753227b01039-refs/branch-heads/8037@{#1589})"
+  },
+  "scripts": [
+    "/@vite/client",
+    "/src/main.jsx"
+  ]
+}

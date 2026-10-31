@@ -1,13 +1,13 @@
 # PROJECT PROGRESS — GPT RESUME
 
-- Last verified: 2026-10-03
+- Last verified: 2026-10-31 (production rollout + live smoke PASS)
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: Global Search + Pin + Sort + Recent production PASS on top of existing compact header/checklist/folder/logo flows. Search feature `f5cdc7b` pushed `main`; Vercel `pzux3i19u` Ready; desktop+iPhone search smoke PASS; isolated search test cleanup=0.
+- Current phase: Folder delete + checklist repair production PASS sau user local review. Rules compile/release PASS; feature `2632f60` pushed main, Vercel `2fp75o1w8` Ready, exact local bundle `index-BLTcuew3.js`; 10/10 local-live + 10/10 production-live PASS, cleanup=0, SEVERE=[]. Xem canonical section 5J và handoff.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
 - `useNotes.js` có Firestore real-time listener, CRUD helpers và nullable `folderId`.
-- `useFolders.js` có realtime folder listener + create/rename helpers.
+- `useFolders.js` có realtime folders + create/rename/delete; delete dùng server query + bounded transactions và không xóa notes. Rules đã compile + release thật, live local deletion PASS.
 - `NoteEditor.jsx` dùng TipTap TaskList/TaskItem cho checklist; checked state nằm trong note HTML nên không đổi Firestore schema.
 - Sync Key được hash SHA-256 trong `useNotes.js`.
 - Firebase config được lấy từ biến `VITE_FIREBASE_*` trong `src\lib\firebase.js`.
@@ -98,6 +98,6 @@
 ## Next actions
 1. User acceptance Global Search + Pin + Sort + Recent together with compact header/checklist on real iPhone.
 2. Continue bundle optimization + Firestore Rules hardening.
-3. Optional future folder delete must move notes to Unfiled, never cascade-delete notes.
+3. Folder delete + checklist repair đã rollout và live production PASS. Còn user thử lại thao tác gốc trên iPhone thật; không tự mở phase mới.
 
 > Nếu mâu thuẫn, `docs\PROJECT_PROGRESS.md` và source/Git evidence mới hơn thắng.

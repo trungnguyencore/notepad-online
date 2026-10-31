@@ -1,10 +1,13 @@
 # 📋 TODO List — Notepad App Online
 
-> **Cập nhật:** 2026-10-03 | **Phiên bản hiện tại:** 1.0.0
+> **Cập nhật:** 2026-10-31 | **Phiên bản hiện tại:** 1.0.0 | Folder delete + checklist repair đã rollout production
 
 ---
 
 ## 🐛 Bugs cần sửa
+
+- [x] **Checklist nested layout/checked styling** — 2026-10-31 local: sửa nested bullet bị flex và gạch ngang lan từ checked parent sang child; label mobile 44×44. Giữ HTML format hiện tại; 25/25 isolated checks PASS (Firestore giả lập).
+- [ ] **User acceptance lỗi thêm/xóa dòng checklist** — các ca Enter/Backspace/Delete/undo/indent/outdent đã giữ nội dung trong local suite; chưa tái hiện mất dữ liệu, cần thử lại thao tác gốc trên iPhone thật sau rollout.
 
 - [x] **Thiếu file `favicon.svg`** — `index.html` dòng 5 reference `/favicon.svg` nhưng file không tồn tại trong `public/`, gây lỗi 404 trên console. ✅ Đã tạo favicon.svg + icon-192.png + icon-512.png
 - [x] **Xóa note không có confirm dialog** — ✅ 2026-09-21: thêm `ConfirmDialog`, test Hủy giữ note và Xóa xác nhận mới xóa.
@@ -41,7 +44,8 @@
 
 ### 🟡 Ưu tiên Trung bình — Bản 1.2
 
-- [ ] **Xóa folder an toàn** — Nếu bổ sung, chỉ xóa folder metadata và chuyển notes bên trong về `Chưa phân loại`; không cascade-delete note.
+- [x] **Xóa folder an toàn — local implementation** — 2026-10-31: confirm/busy/error; chuyển notes về Unfiled bằng transaction theo nhóm 200, giữ content/timestamps/pin; giữ folder nếu lỗi hoặc xuất hiện note mới; không cascade-delete notes. Test giả lập có folder 403 notes và concurrent move.
+- [x] **Rollout xóa folder + checklist repair** — 2026-10-31: user duyệt sau localhost review; rules compile/release, feature `2632f60` push main → Vercel Ready; exact-bundle verification và 10/10 live production checks PASS; test cleanup=0. Còn physical-iPhone original-symptom acceptance riêng.
 - [x] **Ghim ghi chú (Pin)** — ✅ 2026-10-03: `pinned` backward-compatible trong Firestore; pin/unpin không touch `updatedAt`; pinned notes luôn ưu tiên đầu danh sách; desktop/mobile + reload persistence PASS.
 - [x] **Sắp xếp notes** — ✅ 2026-10-03: dropdown `Mới sửa / Cũ nhất / A–Z`; pinned priority giữ trước sort; preference persist localStorage; iPhone control 44px.
 - [x] **Gần đây / Recent notes** — ✅ 2026-10-03: virtual system folder `Gần đây`, tối đa 10 note mở gần nhất qua `lastOpenedAt`; sync chéo iPhone/laptop, recent ordering persist sau reload; không làm đổi `updatedAt`.

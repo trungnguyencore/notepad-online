@@ -1,0 +1,642 @@
+{
+  "results": [
+    {
+      "name": "enter_middle_preserves_surrounding_rows",
+      "pass": true,
+      "evidence": {
+        "html": "<p>note record</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>bu</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>oi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p></div></li></ul>",
+        "json": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "note record",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "attrs": {
+                    "checked": true
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi1",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "bu",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "oi2",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi3",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                }
+              ],
+              "type": "taskList"
+            }
+          ],
+          "type": "doc"
+        },
+        "tasks": [
+          {
+            "checked": "true",
+            "text": "buoi1"
+          },
+          {
+            "checked": "false",
+            "text": "bu"
+          },
+          {
+            "checked": "false",
+            "text": "oi2"
+          },
+          {
+            "checked": "false",
+            "text": "buoi3"
+          }
+        ],
+        "text": "note record\n\n\n\n\n\nbuoi1\n\n\n\nbu\n\n\n\noi2\n\n\n\nbuoi3"
+      }
+    },
+    {
+      "name": "backspace_start_preserves_text_and_other_rows",
+      "pass": true,
+      "evidence": {
+        "html": "<p>note record</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p><p>buoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p></div></li></ul>",
+        "json": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "note record",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "attrs": {
+                    "checked": true
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi1",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    },
+                    {
+                      "content": [
+                        {
+                          "text": "buoi2",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi3",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                }
+              ],
+              "type": "taskList"
+            }
+          ],
+          "type": "doc"
+        },
+        "tasks": [
+          {
+            "checked": "true",
+            "text": "buoi1buoi2"
+          },
+          {
+            "checked": "false",
+            "text": "buoi3"
+          }
+        ],
+        "text": "note record\n\n\n\n\n\nbuoi1\n\nbuoi2\n\n\n\nbuoi3"
+      }
+    },
+    {
+      "name": "delete_character_does_not_remove_checkbox",
+      "pass": true,
+      "evidence": {
+        "html": "<p>note record</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>uoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p></div></li></ul>",
+        "json": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "note record",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "attrs": {
+                    "checked": true
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi1",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "uoi2",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi3",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                }
+              ],
+              "type": "taskList"
+            }
+          ],
+          "type": "doc"
+        },
+        "tasks": [
+          {
+            "checked": "true",
+            "text": "buoi1"
+          },
+          {
+            "checked": "false",
+            "text": "uoi2"
+          },
+          {
+            "checked": "false",
+            "text": "buoi3"
+          }
+        ],
+        "text": "note record\n\n\n\n\n\nbuoi1\n\n\n\nuoi2\n\n\n\nbuoi3"
+      }
+    },
+    {
+      "name": "remove_empty_row_preserves_neighbors",
+      "pass": true,
+      "evidence": {
+        "html": "<p>note record</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p><p></p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p></div></li></ul>",
+        "json": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "note record",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "attrs": {
+                    "checked": true
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi1",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    },
+                    {
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi3",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                }
+              ],
+              "type": "taskList"
+            }
+          ],
+          "type": "doc"
+        },
+        "tasks": [
+          {
+            "checked": "true",
+            "text": "buoi1"
+          },
+          {
+            "checked": "false",
+            "text": "buoi3"
+          }
+        ],
+        "text": "note record\n\n\n\n\n\nbuoi1\n\n\n\n\n\nbuoi3"
+      }
+    },
+    {
+      "name": "enter_empty_exits_list_without_losing_following_row",
+      "pass": true,
+      "evidence": {
+        "html": "<p>note record</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi2</p></div></li></ul><p></p><ul data-type=\"taskList\"><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p></div></li></ul>",
+        "json": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "note record",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "attrs": {
+                    "checked": true
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi1",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi2",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                }
+              ],
+              "type": "taskList"
+            },
+            {
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi3",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                }
+              ],
+              "type": "taskList"
+            }
+          ],
+          "type": "doc"
+        },
+        "tasks": [
+          {
+            "checked": "true",
+            "text": "buoi1"
+          },
+          {
+            "checked": "false",
+            "text": "buoi2"
+          },
+          {
+            "checked": "false",
+            "text": "buoi3"
+          }
+        ],
+        "text": "note record\n\n\n\n\n\nbuoi1\n\n\n\nbuoi2\n\n\n\n\n\n\n\nbuoi3"
+      }
+    },
+    {
+      "name": "nested_bullet_keeps_list_item_layout",
+      "pass": false,
+      "evidence": {
+        "display": "flex",
+        "html": "<ul data-type=\"taskList\"><li data-checked=\"false\"><label contenteditable=\"false\"><input aria-label=\"Task item checkbox for parentbullet child\" type=\"checkbox\"><span></span></label><div><p>parent</p><ul><li><p>bullet child</p></li></ul></div></li></ul>"
+      }
+    },
+    {
+      "name": "checked_parent_does_not_strike_whole_child_container",
+      "pass": false,
+      "evidence": [
+        "line-through",
+        "none"
+      ]
+    },
+    {
+      "name": "fast_switch_preserves_added_row",
+      "pass": true,
+      "evidence": {
+        "expected": "<p>note record</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>new row</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p></div></li></ul>",
+        "actual": "<p>note record</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>new row</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p></div></li></ul>",
+        "saves": [
+          {
+            "content": "<p>note record</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>new row</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p></div></li></ul>",
+            "noteId": "a",
+            "title": "note record"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reload_preserves_checklist",
+      "pass": true,
+      "evidence": {
+        "html": "<p>note record</p><ul data-type=\"taskList\"><li data-checked=\"true\" data-type=\"taskItem\"><label><input type=\"checkbox\" checked=\"checked\"><span></span></label><div><p>buoi1</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi2</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>new row</p></div></li><li data-checked=\"false\" data-type=\"taskItem\"><label><input type=\"checkbox\"><span></span></label><div><p>buoi3</p></div></li></ul>",
+        "json": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "note record",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "attrs": {
+                    "checked": true
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi1",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi2",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "new row",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                },
+                {
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "buoi3",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "taskItem"
+                }
+              ],
+              "type": "taskList"
+            }
+          ],
+          "type": "doc"
+        },
+        "tasks": [
+          {
+            "checked": "true",
+            "text": "buoi1"
+          },
+          {
+            "checked": "false",
+            "text": "buoi2"
+          },
+          {
+            "checked": "false",
+            "text": "new row"
+          },
+          {
+            "checked": "false",
+            "text": "buoi3"
+          }
+        ],
+        "text": "note record\n\n\n\n\n\nbuoi1\n\n\n\nbuoi2\n\n\n\nnew row\n\n\n\nbuoi3"
+      }
+    },
+    {
+      "name": "mobile_checkbox_target_and_no_overflow",
+      "pass": false,
+      "evidence": {
+        "height": 24,
+        "overflow": false,
+        "width": 18
+      }
+    }
+  ],
+  "console": [
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3107/@vite/client 788:8 \"[vite] connecting...\"",
+      "source": "console-api",
+      "timestamp": 1793427144654
+    },
+    {
+      "level": "DEBUG",
+      "message": "http://127.0.0.1:3107/@vite/client 911:14 \"[vite] connected.\"",
+      "source": "console-api",
+      "timestamp": 1793427144662
+    },
+    {
+      "level": "INFO",
+      "message": "http://127.0.0.1:3107/node_modules/.vite/deps/chunk-NXESFFTV.js?v=5331225d 21608:24 \"%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\" \"font-weight:bold\"",
+      "source": "console-api",
+      "timestamp": 1793427144724
+    },
+    {
+      "level": "SEVERE",
+      "message": "http://127.0.0.1:3107/favicon.ico - Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "source": "network",
+      "timestamp": 1793427144831
+    }
+  ]
+}
