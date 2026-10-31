@@ -4,11 +4,14 @@ import {
   addDoc,
   collection,
   doc,
+  getDocsFromServer,
   onSnapshot,
   orderBy,
   query,
+  runTransaction,
   serverTimestamp,
   updateDoc,
+  where,
 } from 'firebase/firestore';
 
 async function hashKey(key) {
@@ -25,11 +28,14 @@ export function useFolders(syncKey) {
   const [error, setError] = useState(null);
   const hashRef = useRef(null);
   const unsubRef = useRef(null);
+  const deletingRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    hashRef.current = null;
+    setFolders([]);
 
     if (!syncKey) {
       setFolders([]);
@@ -113,5 +119,44 @@ export function useFolders(syncKey) {
     }
   }, []);
 
-  return { folders, loading, error, createFolder, renameFolder };
+  const deleteFolder = useCallback(async (folderId) => {
+    if (!hashRef.current || !folderId || ['all', 'recent', 'unfiled'].includes(folderId) || deletingRef.current) return false;
+    // Capture the workspace: switching Sync Key must never redirect an in-flight operation.
+    const workspace = hashRef.current;
+    const folderRef = doc(db, 'sync_data', workspace, 'folders', folderId);
+    const folderNotes = query(collection(db, 'sync_data', workspace, 'notes'), where('folderId', '==', folderId));
+    deletingRef.current = true;
+    setError(null);
+    try {
+      const snapshot = await getDocsFromServer(folderNotes);
+      // Bounded transactions support large folders and recheck concurrent moves.
+      // Only folderId is written; content, pin, openedAt and updatedAt are untouched.
+      for (let offset = 0; offset < snapshot.docs.length; offset += 200) {
+        const refs = snapshot.docs.slice(offset, offset + 200).map(item => item.ref);
+        await runTransaction(db, async transaction => {
+          const current = await Promise.all(refs.map(ref => transaction.get(ref)));
+          for (const item of current) {
+            if (item.exists() && item.data().folderId === folderId) {
+              transaction.update(item.ref, { folderId: null });
+            }
+          }
+        });
+      }
+      if (!(await getDocsFromServer(folderNotes)).empty) {
+        throw new Error('Có ghi chú vừa được thêm vào thư mục. Thư mục vẫn được giữ; hãy thử xóa lại.');
+      }
+      await runTransaction(db, async transaction => {
+        await transaction.get(folderRef);
+        transaction.delete(folderRef);
+      });
+      return true;
+    } catch (err) {
+      setError(`Chưa xóa được thư mục. Ghi chú vẫn được giữ, một số có thể đã chuyển về Chưa phân loại. ${err.message}`);
+      return false;
+    } finally {
+      deletingRef.current = false;
+    }
+  }, []);
+
+  return { folders, loading, error, createFolder, renameFolder, deleteFolder };
 }

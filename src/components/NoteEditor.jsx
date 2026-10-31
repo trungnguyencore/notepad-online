@@ -93,6 +93,7 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
     const draftRef = useRef({ title: note?.title || 'Ghi chú mới', content: note?.content || '' });
     const persistedRef = useRef({ title: note?.title || 'Ghi chú mới', content: note?.content || '' });
     const activeNoteIdRef = useRef(note?.id || null);
+    const draftVersionRef = useRef(0);
 
     const editor = useEditor(
         {
@@ -116,6 +117,7 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                 },
             },
             onUpdate: ({ editor }) => {
+                draftVersionRef.current += 1;
                 const html = editor.getHTML();
                 const title = getTitleFromText(editor.getText());
                 draftRef.current = { title, content: html };
@@ -162,6 +164,7 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
         if (pending.title === persisted.title && pending.content === persisted.content) return undefined;
 
         setSaveState('saving');
+        const version = draftVersionRef.current;
         const timer = setTimeout(async () => {
             const ok = await onUpdate(note.id, pending);
             if (activeNoteIdRef.current !== note.id) return;
@@ -170,7 +173,7 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                 return;
             }
             persistedRef.current = pending;
-            setSaveState('saved');
+            if (version === draftVersionRef.current) setSaveState('saved');
         }, SAVE_DELAY);
 
         return () => clearTimeout(timer);

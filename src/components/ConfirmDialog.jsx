@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 
-export default function ConfirmDialog({ open, title, message, onCancel, onConfirm }) {
+export default function ConfirmDialog({ open, title, message, onCancel, onConfirm, busy = false, error = null }) {
     useEffect(() => {
         if (!open) return undefined;
         const handleKeyDown = (event) => {
-            if (event.key === 'Escape') onCancel();
+            if (event.key === 'Escape' && !busy) onCancel();
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [open, onCancel]);
+    }, [open, onCancel, busy]);
 
     if (!open) return null;
 
@@ -17,7 +17,7 @@ export default function ConfirmDialog({ open, title, message, onCancel, onConfir
             className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 px-4 pb-[max(16px,var(--safe-area-bottom))] pt-[var(--safe-area-top)] backdrop-blur-sm modal-overlay"
             role="presentation"
             onMouseDown={(event) => {
-                if (event.target === event.currentTarget) onCancel();
+                if (event.target === event.currentTarget && !busy) onCancel();
             }}
         >
             <div
@@ -32,11 +32,13 @@ export default function ConfirmDialog({ open, title, message, onCancel, onConfir
                 <p className="mt-2 text-[14px] leading-5 text-apple-text-secondary">
                     {message}
                 </p>
+                {error && <p role="alert" className="mt-3 text-[14px] text-apple-danger">{error}</p>}
 
                 <div className="mt-5 grid grid-cols-2 gap-3">
                     <button
                         type="button"
                         onClick={onCancel}
+                        disabled={busy}
                         className="min-h-11 rounded-xl bg-apple-bg-secondary px-4 font-medium text-apple-text-primary active:scale-[0.98] transition"
                     >
                         Hủy
@@ -44,9 +46,10 @@ export default function ConfirmDialog({ open, title, message, onCancel, onConfir
                     <button
                         type="button"
                         onClick={onConfirm}
+                        disabled={busy}
                         className="min-h-11 rounded-xl bg-apple-danger px-4 font-semibold text-white active:scale-[0.98] transition"
                     >
-                        Xóa
+                        {busy ? 'Đang xử lý...' : 'Xóa'}
                     </button>
                 </div>
             </div>

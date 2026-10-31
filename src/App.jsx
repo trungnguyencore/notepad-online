@@ -48,22 +48,34 @@ export default function App() {
     const [selectedNoteId, setSelectedNoteId] = useState(null);
     const [showSyncModal, setShowSyncModal] = useState(!syncKey);
     const [pendingDeleteId, setPendingDeleteId] = useState(null);
+    const [pendingDeleteFolder, setPendingDeleteFolder] = useState(null);
+    const [deletingFolder, setDeletingFolder] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [folderDialog, setFolderDialog] = useState({ open: false, mode: 'create', folder: null });
 
-    const { notes, loading, error, createNote, updateNote, setPinned, touchNoteOpened, deleteNote } = useNotes(syncKey);
+    const { notes: rawNotes, loading, error, createNote, updateNote, setPinned, touchNoteOpened, deleteNote } = useNotes(syncKey);
     const {
         folders,
         loading: foldersLoading,
         error: folderError,
         createFolder,
         renameFolder,
+        deleteFolder,
     } = useFolders(syncKey);
     const { darkMode, toggleTheme } = useTheme();
+
+    // A stale/offline client may still assign a note to removed metadata. Keep it
+    // visible in Unfiled without rewriting its content or hiding it from the user.
+    const notes = useMemo(() => {
+        if (foldersLoading) return rawNotes;
+        const ids = new Set(folders.map(folder => folder.id));
+        return rawNotes.map(note => note.folderId && !ids.has(note.folderId) ? { ...note, folderId: null } : note);
+    }, [rawNotes, folders, foldersLoading]);
 
     useEffect(() => {
         setSelectedNoteId(null);
         setPendingDeleteId(null);
+        setPendingDeleteFolder(null);
         setSearchQuery('');
         setSelectedFolderId(window.matchMedia('(min-width: 1024px)').matches ? ALL_FOLDER : null);
         if (!syncKey) setShowSyncModal(true);
@@ -196,6 +208,18 @@ export default function App() {
 
     const handleCancelDelete = useCallback(() => setPendingDeleteId(null), []);
 
+    const handleConfirmDeleteFolder = async () => {
+        if (!pendingDeleteFolder || deletingFolder) return;
+        setDeletingFolder(true);
+        const ok = await deleteFolder(pendingDeleteFolder.id);
+        setDeletingFolder(false);
+        if (ok) {
+            setPendingDeleteFolder(null);
+            setSearchQuery('');
+            setSelectedFolderId(UNFILED_FOLDER);
+        }
+    };
+
     const handleOpenCreateFolder = useCallback(() => {
         setFolderDialog({ open: true, mode: 'create', folder: null });
     }, []);
@@ -290,6 +314,7 @@ export default function App() {
                                 onSelect={handleSelectFolder}
                                 onCreate={handleOpenCreateFolder}
                                 onRename={handleOpenRenameFolder}
+                                onDelete={setPendingDeleteFolder}
                             />
                         </aside>
 
@@ -326,6 +351,7 @@ export default function App() {
                                 )
                             ) : selectedNote ? (
                                 <NoteEditor
+                                    key={`${syncKey}:${selectedNote.id}`}
                                     note={selectedNote}
                                     folders={folders}
                                     onUpdate={updateNote}
@@ -358,6 +384,16 @@ export default function App() {
                 initialName={folderDialog.folder?.name || ''}
                 onClose={handleCloseFolderDialog}
                 onSubmit={handleSubmitFolder}
+            />
+
+            <ConfirmDialog
+                open={Boolean(pendingDeleteFolder)}
+                title="Xóa thư mục?"
+                message={`Xóa thư mục “${pendingDeleteFolder?.name || ''}”? Các ghi chú bên trong sẽ chuyển về Chưa phân loại, nội dung được giữ nguyên.`}
+                onCancel={() => setPendingDeleteFolder(null)}
+                onConfirm={handleConfirmDeleteFolder}
+                busy={deletingFolder}
+                error={folderError}
             />
 
             <ConfirmDialog

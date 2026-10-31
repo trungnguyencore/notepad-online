@@ -1,7 +1,7 @@
 import React from 'react';
-import { Clock3, Folder, Inbox, List, Pencil, Plus } from 'lucide-react';
+import { Clock3, Folder, Inbox, List, Pencil, Plus, Trash2 } from 'lucide-react';
 
-function FolderRow({ label, count, active, icon: Icon, onSelect, onRename }) {
+function FolderRow({ label, count, active, icon: Icon, onSelect, onRename, onDelete }) {
   return (
     <div className={`flex min-h-12 items-stretch rounded-xl transition ${active ? 'bg-apple-bg-primary ring-2 ring-apple-accent' : 'hover:bg-apple-bg-tertiary'}`}>
       <button
@@ -18,10 +18,20 @@ function FolderRow({ label, count, active, icon: Icon, onSelect, onRename }) {
         <button
           type="button"
           onClick={onRename}
-          className="m-1 flex w-11 shrink-0 items-center justify-center rounded-xl text-apple-text-secondary hover:bg-apple-bg-tertiary hover:text-apple-text-primary active:scale-95 transition"
+          className="my-1 flex min-h-11 w-11 shrink-0 items-center justify-center rounded-xl text-apple-text-secondary hover:bg-apple-bg-tertiary hover:text-apple-text-primary active:scale-95 transition"
           aria-label={`Đổi tên thư mục ${label}`}
         >
           <Pencil size={16} />
+        </button>
+      )}
+      {onDelete && (
+        <button
+          type="button"
+          onClick={onDelete}
+          className="my-1 flex min-h-11 w-11 shrink-0 items-center justify-center rounded-xl text-apple-text-secondary hover:bg-apple-bg-tertiary hover:text-apple-danger active:scale-95 transition"
+          aria-label={`Xóa thư mục ${label}`}
+        >
+          <Trash2 size={16} />
         </button>
       )}
     </div>
@@ -36,6 +46,7 @@ export default function FolderList({
   onSelect,
   onCreate,
   onRename,
+  onDelete,
 }) {
   const unfiledCount = notes.filter(note => !note.folderId).length;
   const recentCount = Math.min(notes.filter(note => note.lastOpenedAt).length, 10);
@@ -105,6 +116,7 @@ export default function FolderList({
             icon={Folder}
             onSelect={() => onSelect(folder.id)}
             onRename={() => onRename(folder)}
+            onDelete={() => onDelete(folder)}
           />
         ))}
       </div>

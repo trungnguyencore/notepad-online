@@ -17,8 +17,8 @@ service cloud.firestore {
       // Folder là metadata song song với notes; note giữ field folderId để tương thích dữ liệu cũ.
       match /folders/{folderId} {
         allow read, create, update: if true;
-        // Bản folder v1 chưa có UI xóa folder, nên không mở delete.
-        allow delete: if false;
+        // Client moves notes to Unfiled first; deleting metadata never deletes notes.
+        allow delete: if true;
       }
     }
     
