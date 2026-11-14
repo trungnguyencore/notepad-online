@@ -1,161 +1,120 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '../lib/firebase';
 import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
-  serverTimestamp,
-  query,
-  orderBy
+  collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot,
+  serverTimestamp, query, orderBy, runTransaction,
 } from 'firebase/firestore';
 
 async function hashKey(key) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(key);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
+  return Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, '0')).join('');
 }
 
 export function useNotes(syncKey) {
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const hashRef = useRef(null);
-  const unsubRef = useRef(null);
-
-  const setupListener = useCallback(async (key) => {
-    if (!key) {
-      setNotes([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const hashed = await hashKey(key);
-      hashRef.current = hashed;
-      const notesRef = collection(db, 'sync_data', hashed, 'notes');
-      const q = query(notesRef, orderBy('updatedAt', 'desc'));
-
-      if (unsubRef.current) unsubRef.current();
-
-      const unsub = onSnapshot(q, (snapshot) => {
-        const items = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          pinned: Boolean(doc.data().pinned),
-          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-          updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-          lastOpenedAt: doc.data().lastOpenedAt?.toDate?.() || null,
-        }));
-        setNotes(items);
-        setLoading(false);
-      }, (err) => {
-        console.error('Firestore error:', err);
-        setError(err.message);
-        setLoading(false);
-      });
-
-      unsubRef.current = unsub;
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
-  }, []);
+  // Every callback closes over one workspace. Old editor cleanup must never
+  // resolve its destination using the newly selected workspace's hash.
+  const workspace = useMemo(() => ({ key: syncKey, hash: null }), [syncKey]);
+  const [state, setState] = useState({ workspace, notes: [], loading: true, error: null });
+  const fail = useCallback((err) => {
+    setState(current => current.workspace === workspace ? { ...current, error: err.message } : current);
+  }, [workspace]);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    setupListener(syncKey);
+    let cancelled = false;
+    let unsubscribe;
+    setState({ workspace, notes: [], loading: Boolean(syncKey), error: null });
+    if (!syncKey) return undefined;
 
-    return () => {
-      if (unsubRef.current) {
-        unsubRef.current();
-        unsubRef.current = null;
+    const connect = async () => {
+      try {
+        const hashed = await hashKey(syncKey);
+        if (cancelled) return;
+        workspace.hash = hashed;
+        const ref = query(collection(db, 'sync_data', hashed, 'notes'), orderBy('updatedAt', 'desc'));
+        unsubscribe = onSnapshot(ref, snapshot => {
+          if (cancelled) return;
+          const notes = snapshot.docs.map(item => {
+            const data = item.data();
+            return {
+              ...data, id: item.id, pinned: Boolean(data.pinned),
+              createdAt: data.createdAt?.toDate?.() || new Date(),
+              updatedAt: data.updatedAt?.toDate?.() || new Date(),
+              lastOpenedAt: data.lastOpenedAt?.toDate?.() || null,
+            };
+          });
+          setState(current => current.workspace === workspace ? { ...current, notes, loading: false, error: null } : current);
+        }, err => {
+          if (cancelled) return;
+          setState(current => current.workspace === workspace ? { ...current, error: err.message, loading: false } : current);
+        });
+      } catch (err) {
+        if (!cancelled) setState(current => current.workspace === workspace ? { ...current, error: err.message, loading: false } : current);
       }
     };
-  }, [syncKey, setupListener]);
+    void connect();
+    return () => { cancelled = true; unsubscribe?.(); };
+  }, [syncKey, workspace]);
 
   const createNote = useCallback(async (title = 'Ghi chú mới', content = '', folderId = null) => {
-    if (!hashRef.current) return null;
+    if (!workspace.hash) return null;
     try {
-      const notesRef = collection(db, 'sync_data', hashRef.current, 'notes');
-      const docRef = await addDoc(notesRef, {
-        title,
-        content,
-        folderId: folderId || null,
-        pinned: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        lastOpenedAt: serverTimestamp(),
+      const result = await addDoc(collection(db, 'sync_data', workspace.hash, 'notes'), {
+        title, content, folderId: folderId || null, pinned: false,
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastOpenedAt: serverTimestamp(),
       });
-      return docRef.id;
-    } catch (err) {
-      setError(err.message);
-      return null;
-    }
-  }, []);
+      return result.id;
+    } catch (err) { fail(err); return null; }
+  }, [workspace, fail]);
 
-  const updateNote = useCallback(async (noteId, data) => {
-    if (!hashRef.current) return false;
+  const updateNote = useCallback(async (noteId, data, options = {}) => {
+    if (!workspace.hash) return false;
+    const ref = doc(db, 'sync_data', workspace.hash, 'notes', noteId);
     try {
-      const noteRef = doc(db, 'sync_data', hashRef.current, 'notes', noteId);
-      await updateDoc(noteRef, {
-        ...data,
-        updatedAt: serverTimestamp(),
-      });
+      if (options.expected) {
+        // Compare only title/content: pin, folder moves and timestamps must not
+        // cause false conflicts or get overwritten by an editor save.
+        return await runTransaction(db, async transaction => {
+          const snapshot = await transaction.get(ref);
+          if (!snapshot.exists()) return { conflict: true, remote: null };
+          const current = snapshot.data();
+          const remote = { title: current.title || 'Ghi chú mới', content: current.content || '' };
+          if (remote.title !== options.expected.title || remote.content !== options.expected.content) {
+            return { conflict: true, remote };
+          }
+          transaction.update(ref, { ...data, updatedAt: serverTimestamp() });
+          return true;
+        });
+      }
+      await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
       return true;
-    } catch (err) {
-      setError(err.message);
-      return false;
-    }
-  }, []);
+    } catch (err) { fail(err); return false; }
+  }, [workspace, fail]);
 
   const setPinned = useCallback(async (noteId, pinned) => {
-    if (!hashRef.current) return false;
+    if (!workspace.hash) return false;
     try {
-      const noteRef = doc(db, 'sync_data', hashRef.current, 'notes', noteId);
-      await updateDoc(noteRef, { pinned: Boolean(pinned) });
+      await updateDoc(doc(db, 'sync_data', workspace.hash, 'notes', noteId), { pinned: Boolean(pinned) });
       return true;
-    } catch (err) {
-      setError(err.message);
-      return false;
-    }
-  }, []);
+    } catch (err) { fail(err); return false; }
+  }, [workspace, fail]);
 
-  const touchNoteOpened = useCallback(async (noteId) => {
-    if (!hashRef.current) return false;
+  const touchNoteOpened = useCallback(async noteId => {
+    if (!workspace.hash) return false;
     try {
-      const noteRef = doc(db, 'sync_data', hashRef.current, 'notes', noteId);
-      await updateDoc(noteRef, { lastOpenedAt: serverTimestamp() });
+      await updateDoc(doc(db, 'sync_data', workspace.hash, 'notes', noteId), { lastOpenedAt: serverTimestamp() });
       return true;
-    } catch (err) {
-      setError(err.message);
-      return false;
-    }
-  }, []);
+    } catch (err) { fail(err); return false; }
+  }, [workspace, fail]);
 
-  const deleteNote = useCallback(async (noteId) => {
-    if (!hashRef.current) return;
+  const deleteNote = useCallback(async noteId => {
+    if (!workspace.hash) return false;
     try {
-      const noteRef = doc(db, 'sync_data', hashRef.current, 'notes', noteId);
-      await deleteDoc(noteRef);
-    } catch (err) {
-      setError(err.message);
-    }
-  }, []);
+      await deleteDoc(doc(db, 'sync_data', workspace.hash, 'notes', noteId));
+      return true;
+    } catch (err) { fail(err); return false; }
+  }, [workspace, fail]);
 
-  return {
-    notes,
-    loading,
-    error,
-    createNote,
-    updateNote,
-    setPinned,
-    touchNoteOpened,
-    deleteNote,
-  };
+  // Hide the previous workspace synchronously, before the new effect runs.
+  const visible = state.workspace === workspace ? state : { notes: [], loading: Boolean(syncKey), error: null };
+  return { ...visible, workspaceId: workspace.hash, createNote, updateNote, setPinned, touchNoteOpened, deleteNote };
 }

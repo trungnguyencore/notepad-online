@@ -3,36 +3,42 @@ import { Clock3, Folder, Inbox, List, Pencil, Plus, Trash2 } from 'lucide-react'
 
 function FolderRow({ label, count, active, icon: Icon, onSelect, onRename, onDelete }) {
   return (
-    <div className={`flex min-h-12 items-stretch rounded-xl transition ${active ? 'bg-apple-bg-primary ring-2 ring-apple-accent' : 'hover:bg-apple-bg-tertiary'}`}>
+    <div className={`flex min-h-12 ${onRename || onDelete ? 'flex-col' : ''} items-stretch rounded-xl transition ${active ? 'bg-apple-bg-primary ring-2 ring-apple-accent' : 'hover:bg-apple-bg-tertiary'}`}>
       <button
         type="button"
         onClick={onSelect}
-        className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-left"
+        className="flex min-h-11 min-w-0 flex-1 items-center gap-3 px-3 py-2 text-left"
         aria-current={active ? 'true' : undefined}
       >
         <Icon size={18} className={`shrink-0 ${active ? 'text-apple-accent' : 'text-apple-text-secondary'}`} />
-        <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-apple-text-primary">{label}</span>
+        <span className="min-w-0 flex-1 break-words [overflow-wrap:anywhere] text-[14px] font-medium text-apple-text-primary">{label}</span>
         <span className="shrink-0 text-[12px] text-apple-text-secondary">{count}</span>
       </button>
-      {onRename && (
-        <button
-          type="button"
-          onClick={onRename}
-          className="my-1 flex min-h-11 w-11 shrink-0 items-center justify-center rounded-xl text-apple-text-secondary hover:bg-apple-bg-tertiary hover:text-apple-text-primary active:scale-95 transition"
-          aria-label={`Đổi tên thư mục ${label}`}
-        >
-          <Pencil size={16} />
-        </button>
-      )}
-      {onDelete && (
-        <button
-          type="button"
-          onClick={onDelete}
-          className="my-1 flex min-h-11 w-11 shrink-0 items-center justify-center rounded-xl text-apple-text-secondary hover:bg-apple-bg-tertiary hover:text-apple-danger active:scale-95 transition"
-          aria-label={`Xóa thư mục ${label}`}
-        >
-          <Trash2 size={16} />
-        </button>
+      {(onRename || onDelete) && (
+        <div className="flex justify-end gap-1 px-1 pb-1">
+          {onRename && (
+            <button
+              type="button"
+              onClick={onRename}
+              className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-xl px-2 text-[12px] text-apple-text-secondary hover:bg-apple-bg-tertiary hover:text-apple-text-primary active:scale-95 transition"
+              aria-label={`Đổi tên thư mục ${label}`}
+            >
+              <Pencil size={16} />
+              Đổi tên
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-xl px-2 text-[12px] text-apple-text-secondary hover:bg-apple-bg-tertiary hover:text-apple-danger active:scale-95 transition"
+              aria-label={`Xóa thư mục ${label}`}
+            >
+              <Trash2 size={16} />
+              Xóa
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

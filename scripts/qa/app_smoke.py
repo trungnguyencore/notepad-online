@@ -1,0 +1,150 @@
+﻿"""Full-app local smoke tests. Uses only a new disposable browser profile/workspace."""
+import hashlib
+import json
+from pathlib import Path
+import sys
+import time
+import uuid
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+
+sys.stdout.reconfigure(encoding='utf-8')
+out=Path('docs/qa/2026-11-13')
+cache=Path.home()/'.cache/selenium/chromedriver/win64'
+drivers=sorted(cache.glob('*/chromedriver.exe'),key=lambda p:tuple(map(int,p.parent.name.split('.'))))
+options=webdriver.ChromeOptions()
+options.add_argument('--headless=new')
+options.add_argument('--window-size=1440,1000')
+options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+d=webdriver.Chrome(service=Service(str(drivers[-1])),options=options)
+w=WebDriverWait(d,12)
+results=[]
+js=lambda code,*args:d.execute_script(code,*args)
+def check(name,passed,evidence=None):
+    results.append({'name':name,'pass':bool(passed),'evidence':evidence})
+    print(name, 'PASS' if passed else 'FAIL',flush=True)
+def text(): return d.find_element(By.TAG_NAME,'body').text
+def click(selector):
+    w.until(lambda _:d.find_element(By.CSS_SELECTOR,selector).is_displayed())
+    d.find_element(By.CSS_SELECTOR,selector).click()
+def editor(): return d.find_element(By.CSS_SELECTOR,'.ProseMirror')
+def wait_editor(content): w.until(lambda _:editor().text.strip()==content)
+def stored():return js('return window.firestoreQA.records.get(arguments[0])?.content',f'{root}/notes/n1')
+key='qa-full-app-'+uuid.uuid4().hex
+root='sync_data/'+hashlib.sha256(key.encode()).hexdigest()
+try:
+    d.get('http://127.0.0.1:3113/')
+    js("localStorage.setItem('notepad-sync-key',arguments[0]);",key)
+    d.refresh()
+    w.until(lambda _:js('return !!window.firestoreQA'))
+    js("""const q=window.firestoreQA,r=arguments[0];q.records.set(r+'/folders/f1',{name:'QA Học tập',createdAt:q.stamp(),updatedAt:q.stamp()});q.records.set(r+'/notes/n1',{title:'QA Báo cáo',content:'<p>QA Báo cáo</p><p>Học máy và nghiên cứu</p>',folderId:'f1',createdAt:q.stamp(),updatedAt:q.stamp(),pinned:false,lastOpenedAt:q.stamp()});q.emit();""",root)
+    w.until(lambda _:'QA Báo cáo' in text())
+    click('[aria-label="Tìm trong tất cả ghi chú"]')
+    search=d.find_element(By.CSS_SELECTOR,'[aria-label="Tìm trong tất cả ghi chú"]')
+    search.send_keys('cao hoc')
+    w.until(lambda _:'1 kết quả / 1 ghi chú' in text())
+    check('full_app_cross_paragraph_search',True)
+    check('full_app_preview_separates_paragraphs', 'QA Báo cáo Học máy' in text())
+    click('[aria-label="Xóa tìm kiếm"]')
+    click('[aria-label="Đổi tên thư mục QA Học tập"]')
+    name=d.find_element(By.CSS_SELECTOR,'[role=dialog] input')
+    name.send_keys(Keys.CONTROL,'a');name.send_keys('QA Đã đổi tên');name.send_keys(Keys.ENTER)
+    w.until(lambda _:not d.find_elements(By.CSS_SELECTOR,'[role=dialog]'))
+    check('folder_rename',bool(d.find_elements(By.CSS_SELECTOR,'[aria-label="Đổi tên thư mục QA Đã đổi tên"]')))
+    d.save_screenshot(str(out/'app-desktop.png'))
+    first=d.current_window_handle
+    d.switch_to.new_window('tab')
+    second=d.current_window_handle
+    d.get('http://127.0.0.1:3113/')
+    wait_editor('QA Báo cáo\nHọc máy và nghiên cứu')
+    js("const q=window.firestoreQA,p=arguments[0];q.records.set(p,{...q.records.get(p),title:'Remote accepted',content:'<p>Remote accepted</p>'});q.emit();",f'{root}/notes/n1')
+    d.switch_to.window(first)
+    wait_editor('Remote accepted')
+    check('two_tabs_clean_remote_update',True)
+    js('window.firestoreQA.fail=true')
+    editor().click();editor().send_keys(Keys.CONTROL,'a');editor().send_keys('Local preserved')
+    w.until(lambda _:'Lỗi lưu' in text())
+    check('save_failure_keeps_recovery_draft',js("return Object.keys(sessionStorage).some(k=>k.startsWith('notepad-draft:')&&sessionStorage.getItem(k).includes('Local preserved'))"))
+    d.switch_to.window(second)
+    js("const q=window.firestoreQA,p=arguments[0];q.records.set(p,{...q.records.get(p),title:'Remote conflict',content:'<p>Remote conflict</p>'});q.emit();",f'{root}/notes/n1')
+    d.switch_to.window(first)
+    w.until(lambda _:'Bản nháp của bạn được giữ lại' in text())
+    check('two_tabs_dirty_remote_preserves_local',editor().text=='Local preserved')
+    time.sleep(.6)
+    check('conflict_does_not_overwrite_backend',stored()=='<p>Remote conflict</p>')
+    d.save_screenshot(str(out/'app-conflict-desktop.png'))
+    d.refresh()
+    w.until(lambda _:'Bản nháp của bạn được giữ lại' in text())
+    check('reload_restores_conflicting_draft',editor().text=='Local preserved')
+    button=next(b for b in d.find_elements(By.TAG_NAME,'button') if b.text=='Giữ bản của tôi')
+    button.click()
+    w.until(lambda _:stored()=='<p>Local preserved</p>')
+    check('keep_local_saves_after_confirmation',True)
+    w.until(lambda _:'Đã lưu' in text())
+    check('recovery_entry_cleared_after_save',not js("return Object.keys(sessionStorage).some(k=>k.startsWith('notepad-draft:'))"))
+    check('no_stale_save_error_after_recovery','simulated permission/network failure' not in text())
+    d.switch_to.window(second)
+    wait_editor('Local preserved')
+    check('second_tab_receives_confirmed_content',True)
+    d.close();d.switch_to.window(first)
+    click('[aria-label="Ghim Local preserved"]')
+    w.until(lambda _:bool(d.find_elements(By.CSS_SELECTOR,'[aria-label="Bỏ ghim Local preserved"]')))
+    check('pin_toggle',True)
+    # Change Sync Key while a draft is inside the 450ms debounce.
+    editor().click();editor().send_keys(Keys.END);editor().send_keys(' old workspace')
+    click('header button')
+    keybox=d.find_element(By.CSS_SELECTOR,'input[type=password]')
+    keybox.send_keys(Keys.CONTROL,'a');keybox.send_keys(key+'-B');keybox.send_keys(Keys.ENTER)
+    w.until(lambda _:'Chưa có ghi chú nào' in text())
+    w.until(lambda _:'old workspace' in (stored() or ''))
+    check('sync_key_switch_flushes_original_workspace',True)
+    check('new_workspace_has_no_old_note',not d.find_elements(By.CSS_SELECTOR,'.ProseMirror'))
+    # Return to original local workspace via the real Sync Key dialog.
+    click('header button');keybox=d.find_element(By.CSS_SELECTOR,'input[type=password]')
+    keybox.send_keys(Keys.CONTROL,'a');keybox.send_keys(key);keybox.send_keys(Keys.ENTER)
+    w.until(lambda _:bool(d.find_elements(By.CSS_SELECTOR,'.ProseMirror')))
+    click('[aria-label="Xóa thư mục QA Đã đổi tên"]')
+    w.until(lambda _:bool(d.find_elements(By.CSS_SELECTOR,'[role=alertdialog]')))
+    d.find_element(By.TAG_NAME,'body').send_keys(Keys.ESCAPE)
+    w.until(lambda _:not d.find_elements(By.CSS_SELECTOR,'[role=alertdialog]'))
+    check('folder_delete_cancel',bool(d.find_elements(By.CSS_SELECTOR,'[aria-label="Xóa thư mục QA Đã đổi tên"]')))
+    click('[aria-label="Xóa thư mục QA Đã đổi tên"]')
+    d.find_elements(By.CSS_SELECTOR,'[role=alertdialog] button')[-1].click()
+    w.until(lambda _:not js('return window.firestoreQA.records.has(arguments[0])',root+'/folders/f1'))
+    check('folder_delete_retains_note',js('return window.firestoreQA.records.get(arguments[0])?.folderId===null',root+'/notes/n1'))
+    # Mobile, actual app, after a cold reload.
+    d.execute_cdp_cmd('Emulation.setDeviceMetricsOverride',{'width':393,'height':852,'deviceScaleFactor':1,'mobile':True})
+    d.execute_cdp_cmd('Emulation.setTouchEmulationEnabled',{'enabled':True})
+    d.refresh();w.until(lambda _:'Thư mục' in text())
+    click('[aria-label="Tạo thư mục mới"]')
+    name=d.find_element(By.CSS_SELECTOR,'[role=dialog] input');name.send_keys('Tên thư mục đủ dài để kiểm tra xuống dòng');name.send_keys(Keys.ENTER)
+    w.until(lambda _:not d.find_elements(By.CSS_SELECTOR,'[role=dialog]'))
+    click('[aria-label="Quay lại danh sách thư mục"]')
+    w.until(lambda _:bool(d.find_elements(By.CSS_SELECTOR,'[aria-label^="Đổi tên thư mục"]')))
+    check('mobile_folder_layout',js("return document.documentElement.scrollWidth<=innerWidth && [...document.querySelectorAll('aside button')].filter(b=>b.getBoundingClientRect().width>0).every(b=>b.getBoundingClientRect().height>=44)"))
+    d.save_screenshot(str(out/'app-mobile-folders.png'))
+    bytext=next(b for b in d.find_elements(By.TAG_NAME,'button') if b.text.startswith('Chưa phân loại'))
+    bytext.click()
+    w.until(lambda _:bool(d.find_elements(By.CSS_SELECTOR,'.note-card')))
+    d.find_element(By.CSS_SELECTOR,'.note-card > button').click()
+    w.until(lambda _:bool(d.find_elements(By.CSS_SELECTOR,'.ProseMirror')))
+    check('mobile_editor_delete_accessible_name',bool(d.find_elements(By.CSS_SELECTOR,'[aria-label="Xóa ghi chú"]')))
+    check('mobile_editor_no_horizontal_overflow',js('return document.documentElement.scrollWidth<=innerWidth'))
+    d.save_screenshot(str(out/'app-mobile-editor.png'))
+    # Final note deletion is exercised only against this disposable local record.
+    click('[aria-label="Xóa ghi chú"]')
+    d.find_elements(By.CSS_SELECTOR,'[role=alertdialog] button')[-1].click()
+    w.until(lambda _:not js('return window.firestoreQA.records.has(arguments[0])',root+'/notes/n1'))
+    check('confirmed_delete_note',True)
+except Exception as exc:
+    check('unexpected_exception',False,str(exc))
+    d.save_screenshot(str(out/'app-failure.png'))
+finally:
+    report={'environment':'actual app + localStorage Firestore double, disposable profile/workspace','browser':d.capabilities['browserVersion'],'results':results,'passed':sum(r['pass'] for r in results),'total':len(results),'console':d.get_log('browser')}
+    (out/'app-smoke.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    print(json.dumps({'passed':report['passed'],'total':report['total'],'failed':[r for r in results if not r['pass']]},ensure_ascii=False,indent=2))
+    d.quit()
+if report['passed']!=report['total']:sys.exit(1)

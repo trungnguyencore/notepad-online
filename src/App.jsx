@@ -11,22 +11,13 @@ import NoteEditor from './components/NoteEditor';
 import NoteList from './components/NoteList';
 import SyncKeyModal from './components/SyncKeyModal';
 import ThemeToggle from './components/ThemeToggle';
+import { getPlainText } from './lib/noteText';
 
 const SYNC_KEY_STORAGE = 'notepad-sync-key';
 const ALL_FOLDER = 'all';
 const RECENT_FOLDER = 'recent';
 const UNFILED_FOLDER = 'unfiled';
 const INSTAGRAM_URL = 'https://www.instagram.com/trunk.ng/';
-
-function getPlainText(content) {
-    if (!content) return '';
-    try {
-        const parsed = new DOMParser().parseFromString(content, 'text/html');
-        return parsed.body.textContent || '';
-    } catch {
-        return String(content).replace(/<[^>]*>/g, ' ');
-    }
-}
 
 function normalizeSearchText(value) {
     return String(value || '')
@@ -53,7 +44,7 @@ export default function App() {
     const [searchQuery, setSearchQuery] = useState('');
     const [folderDialog, setFolderDialog] = useState({ open: false, mode: 'create', folder: null });
 
-    const { notes: rawNotes, loading, error, createNote, updateNote, setPinned, touchNoteOpened, deleteNote } = useNotes(syncKey);
+    const { notes: rawNotes, loading, error, workspaceId, createNote, updateNote, setPinned, touchNoteOpened, deleteNote } = useNotes(syncKey);
     const {
         folders,
         loading: foldersLoading,
@@ -353,6 +344,7 @@ export default function App() {
                                 <NoteEditor
                                     key={`${syncKey}:${selectedNote.id}`}
                                     note={selectedNote}
+                                    draftStorageKey={`notepad-draft:${workspaceId}:${selectedNote.id}`}
                                     folders={folders}
                                     onUpdate={updateNote}
                                     onMoveFolder={handleMoveNoteFolder}

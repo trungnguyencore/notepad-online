@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronLeft, Pin, Plus, Search, Trash2, X } from 'lucide-react';
+import { getPlainText } from '../lib/noteText';
 
 const SORT_STORAGE = 'notepad-note-sort';
 
@@ -23,13 +24,7 @@ function formatNoteDate(value) {
 }
 
 function getPreviewText(content) {
-    if (!content) return '';
-    try {
-        const doc = new DOMParser().parseFromString(content, 'text/html');
-        return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
-    } catch (error) {
-        return String(content).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-    }
+    return getPlainText(content);
 }
 
 function getTime(value) {

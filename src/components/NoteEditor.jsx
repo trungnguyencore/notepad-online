@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -7,8 +7,7 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import { Bold, ChevronLeft, Italic, List, ListChecks, ListOrdered, Quote, Trash2, Underline as UnderlineIcon } from 'lucide-react';
 import FolderPicker from './FolderPicker';
-
-const SAVE_DELAY = 450;
+import { useNoteDraft } from '../hooks/useNoteDraft';
 
 function formatDetailDate(value) {
     if (!value) return '';
@@ -86,14 +85,10 @@ function TextStyleSelect({ editor }) {
     );
 }
 
-export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDelete, onBack }) {
-    const [draftTitle, setDraftTitle] = useState(note?.title || 'Ghi chú mới');
-    const [draftContent, setDraftContent] = useState(note?.content || '');
-    const [saveState, setSaveState] = useState('idle');
-    const draftRef = useRef({ title: note?.title || 'Ghi chú mới', content: note?.content || '' });
-    const persistedRef = useRef({ title: note?.title || 'Ghi chú mới', content: note?.content || '' });
-    const activeNoteIdRef = useRef(note?.id || null);
-    const draftVersionRef = useRef(0);
+export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDelete, onBack, draftStorageKey }) {
+    const draft = useNoteDraft(note, onUpdate, draftStorageKey);
+    const draftTitle = draft.title;
+    const saveState = draft.status;
 
     const editor = useEditor(
         {
@@ -110,81 +105,28 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                     placeholder: 'Bắt đầu viết...'
                 }),
             ],
-            content: note?.content || '',
+            content: draft.content,
             editorProps: {
                 attributes: {
                     class: 'text-note-body text-apple-text-primary focus:outline-none',
                 },
             },
             onUpdate: ({ editor }) => {
-                draftVersionRef.current += 1;
-                const html = editor.getHTML();
-                const title = getTitleFromText(editor.getText());
-                draftRef.current = { title, content: html };
-                setDraftTitle(title);
-                setDraftContent(html);
+                draft.change({ title: getTitleFromText(editor.getText()), content: editor.getHTML() });
             },
         },
         [note?.id]
     );
 
+    // Only explicit remote adoption changes revision. Local typing keeps the
+    // existing selection/undo history; remote content is applied without saving it back.
     useEffect(() => {
-        const initial = {
-            title: note?.title || 'Ghi chú mới',
-            content: note?.content || '',
-        };
-        activeNoteIdRef.current = note?.id || null;
-        draftRef.current = initial;
-        persistedRef.current = initial;
-        setDraftTitle(initial.title);
-        setDraftContent(initial.content);
-        setSaveState('idle');
+        if (editor && editor.getHTML() !== draft.content) editor.commands.setContent(draft.content, false);
+    }, [editor, draft.revision]);
 
-        return () => {
-            if (!note?.id) return;
-            const pending = draftRef.current;
-            const persisted = persistedRef.current;
-            if (pending.title === persisted.title && pending.content === persisted.content) return;
-            onUpdate(note.id, {
-                title: pending.title || 'Ghi chú mới',
-                content: pending.content || '',
-            });
-        };
-    }, [note?.id, onUpdate]);
-
-    useEffect(() => {
-        if (!note?.id) return undefined;
-
-        const pending = {
-            title: draftTitle || 'Ghi chú mới',
-            content: draftContent || '',
-        };
-        draftRef.current = pending;
-        const persisted = persistedRef.current;
-        if (pending.title === persisted.title && pending.content === persisted.content) return undefined;
-
-        setSaveState('saving');
-        const version = draftVersionRef.current;
-        const timer = setTimeout(async () => {
-            const ok = await onUpdate(note.id, pending);
-            if (activeNoteIdRef.current !== note.id) return;
-            if (ok === false) {
-                setSaveState('error');
-                return;
-            }
-            persistedRef.current = pending;
-            if (version === draftVersionRef.current) setSaveState('saved');
-        }, SAVE_DELAY);
-
-        return () => clearTimeout(timer);
-    }, [draftTitle, draftContent, note?.id, onUpdate]);
-
-    const statusLabel = useMemo(() => {
-        if (saveState === 'saving') return 'Đang lưu...';
-        if (saveState === 'saved') return 'Đã lưu';
-        if (saveState === 'error') return 'Lỗi lưu';
-        return 'Tự động lưu';
-    }, [saveState]);
+    const statusLabel = {
+        saving: 'Đang lưu...', saved: 'Đã lưu', error: 'Lỗi lưu', conflict: 'Có thay đổi từ phiên khác',
+    }[saveState] || 'Tự động lưu';
 
     if (!note) {
         return (
@@ -226,6 +168,7 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                     </div>
                     <button
                         type="button"
+                        aria-label="Xóa ghi chú"
                         onClick={() => onDelete(note.id)}
                         className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full px-3 text-note-caption text-apple-text-secondary hover:text-apple-danger hover:bg-apple-bg-tertiary active:scale-95 transition"
                     >
@@ -288,7 +231,24 @@ export default function NoteEditor({ note, folders, onUpdate, onMoveFolder, onDe
                 </div>
             </div>
 
-            <div className="mt-2 flex-1 overflow-y-auto">
+            {draft.conflict && (
+                <div role="alert" className="mt-2 rounded-xl border border-apple-accent bg-apple-bg-tertiary p-3 text-note-caption">
+                    <p>Ghi chú đã thay đổi ở phiên khác. Bản nháp của bạn được giữ lại, chưa ghi đè bản mới.</p>
+                    {draft.conflict.remote && <>
+                        <p className="mt-1">Dùng bản mới sẽ thay nội dung đang soạn. Giữ bản của tôi sẽ lưu nội dung đang soạn thay cho bản mới.</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            <button type="button" onClick={draft.useRemote} className="min-h-11 rounded-xl bg-apple-bg-secondary px-3">Dùng bản mới</button>
+                            <button type="button" onClick={draft.keepLocal} className="min-h-11 rounded-xl bg-apple-accent px-3 text-black">Giữ bản của tôi</button>
+                        </div>
+                    </>}
+                </div>
+            )}
+            {saveState === 'error' && <div role="alert" className="mt-2 flex items-center gap-2 text-note-caption text-apple-danger">
+                <span>Chưa lưu được thay đổi.</span>
+                <button type="button" onClick={draft.retry} className="min-h-11 rounded-xl px-3 underline">Thử lưu lại</button>
+            </div>}
+            {draft.recoveryError && <p role="alert" className="mt-2 text-note-caption text-apple-danger">Không thể lưu bản nháp trên thiết bị. Hãy giữ trang mở và sao chép nội dung trước khi rời đi.</p>}
+            <div className="mt-2 flex-1 min-h-0 overflow-y-auto">
                 <EditorContent editor={editor} className="min-h-[360px]" />
             </div>
         </div>
