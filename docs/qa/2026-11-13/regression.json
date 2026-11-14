@@ -1,0 +1,160 @@
+{
+  "name": "regression",
+  "environment": "actual React/TipTap + isolated Firestore double; not live Firebase",
+  "viewport": {
+    "width": 1424,
+    "height": 849
+  },
+  "results": [
+    {
+      "name": "block_boundaries",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "nested_inline_br_entities",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "delete_accessible_name",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "clean_editor_accepts_remote",
+      "pass": true,
+      "evidence": "Remote clean"
+    },
+    {
+      "name": "remote_adoption_no_writeback",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "dirty_remote_preserves_draft",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "conflict_blocks_autosave",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "conflict_recovery_stored",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "conflict_unmount_does_not_overwrite_remote",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "conflict_restored_after_remount",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "use_remote_explicit",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "keep_local_explicit_cas",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "late_remote_cas_rejects_stale_save",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "unmount_flushes_pending_draft",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "serial_saves_keep_latest_version",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "revert_to_saved_content_not_stuck_saving",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "identical_remote_does_not_create_conflict",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "old_completion_does_not_erase_new_recovery",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "reopen_during_save_keeps_unsaved_content",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "reopen_during_save_can_resolve_latest_content",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "checklist_checked_state_remount",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "folder_name_not_clipped",
+      "pass": true,
+      "evidence": {
+        "width": 119,
+        "scrollWidth": 119
+      }
+    },
+    {
+      "name": "folder_action_targets",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "new_workspace_unready_blocks_writes",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "late_hash_cannot_rebind_listener",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "old_callback_writes_original_workspace",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "transaction_rejects_stale_baseline",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "transaction_accepts_matching_baseline",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "empty_sync_key_clears_workspace",
+      "pass": true,
+      "evidence": null
+    }
+  ],
+  "passed": 29,
+  "total": 29
+}

@@ -1,7 +1,31 @@
 # PROJECT EVIDENCE — Notepad Online
 
-- Last verified: 2026-10-31 production; older rollout sections below are historical
+- Last verified: 2026-11-14 production; older rollout sections below are historical
 - Canonical progress: `docs\PROJECT_PROGRESS.md`
+
+## Production fixes rollout — 2026-11-14 — PASS
+
+- User approved deploy; feature `1965688` pushed main, Vercel `cf1zs5ptv` READY; `docs/qa/2026-11-14/deployment-feature.json`.
+- `production-bundle.json`: `/assets/index-4u6YFiP1.js`, 841275 bytes, SHA256 `335578c81d5828fe330701dbc3ec44c54dcca6e6bfbacf317bd60da969a80580`; byte-for-byte equal to reviewed build, no LOCAL TEST/mock marker.
+- `live-local.json` 10/10 + `sync-local-final.json` 9/9 actual SDK/Firestore preflight; `live-production.json` 10/10 + `sync-production.json` 9/9 on production alias. All final cleanup=0/error=null/SEVERE=0.
+- Viewed production mobile checklist and desktop conflict images; backend REST readback independent. No user-note data touched; no rules/schema/dependency change; no physical-iPhone/offline/retry blanket claim.
+- Latest handoff `docs/qa/2026-11-14/ROLLOUT.md`, canonical 5M supersedes historical pending-review checkpoint/local-only notes. Documentation-only push may deploy same runtime; final alias Ready/hash check remains local artifact.
+- Checkpoint 2026-11-14: readback of 4 reports = 104/104; recomputed 10 source/build SHA-256 entries match `docs/qa/2026-11-13/hashes.json`; local 3113 HTTP 200. No new test/build; handoff `docs/qa/2026-11-13/HANDOFF.md`, user acceptance/deploy still pending.
+
+## Local fixes — 2026-11-13 — USER REVIEW PENDING
+
+- `docs/qa/2026-11-13/FIXES.md`, canonical 5L: 3 UI/UX + 2 sync findings fixed, source uncommitted; no push/deploy/rules change.
+- Final `regression.json` 29/29 desktop, `regression-mobile.json` 29/29 393×852, `legacy-regression.json` 25/25, `app-smoke.json` 21/21. Total 104/104 local checks; desktop/mobile regression SEVERE=0.
+- Full app two-tab smoke reproduces clean remote adoption, dirty conflict preservation/recovery/reload/explicit keep, failed save and key switch during debounce on isolated local backend. Not Firebase real/emulator or physical-iPhone proof.
+- `build.txt`: 1707 modules, JS 841.28 kB / gzip 238.39 kB, final `index-4u6YFiP1.js` in `dist-review-20261113`; `hashes.json` records source/build SHA-256. Large-chunk/Browserslist warnings remain.
+- Viewed `app-desktop.png`, `app-conflict-desktop.png`, `app-mobile-folders.png`, `app-mobile-editor.png`. QA server 3113 HTTP 200 retained for user review; old dist/artifacts/user browser data preserved. Production last verified remains 31/10.
+
+## Local audit — 2026-11-13
+
+- `docs/qa/2026-11-13/AUDIT.md`: manual observations/repro steps + source anchors; screenshot/AX ở tool transcript, không có screenshot local mới hoặc automated output.
+- Desktop dark/light và DevTools iPhone 16 393×852; folder CRUD giữ note, note autosave/reload, checklist operations/tick + mobile cold reload, pin, sort selection, Recent, search, cancel note delete đã quan sát. Không phải full regression hoặc Firebase integration PASS.
+- 3 confirmed UI/UX issues, 2 source-only sync risks cần runtime probe. Test notes isolated tại localhost 3113; source/rules/production config chưa đổi, không build/push/deploy.
+- Last verified production vẫn là 2026-10-31, không refresh production evidence bằng mock.
 
 ## Production rollout — 2026-10-31
 

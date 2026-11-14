@@ -1,10 +1,13 @@
 # PROJECT PROGRESS — Notepad Online
 
-- **Last verified:** 2026-10-31 (production rollout + live smoke PASS)
+- **Last verified:** 2026-11-14 (production rollout + 19/19 actual Firebase checks PASS)
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** Folder delete giữ notes + checklist repair đã rollout production PASS. Feature `2632f60` pushed main; Vercel `2fp75o1w8` Ready; production alias phục vụ exact local bundle `index-BLTcuew3.js`. Firebase rules compile/release PASS; actual Firebase smoke 10/10 local + 10/10 production PASS; test cleanup notes=0/folders=0 trên cả hai workspace. Xem section 5J và `docs/qa/2026-10-31/HANDOFF.md`.
+- **Status:** Local fixes đã được user duyệt và rollout production PASS. Feature `1965688` pushed main; Vercel `cf1zs5ptv` Ready; alias `https://notepad-online-beta.vercel.app` phục vụ exact reviewed bundle `index-4u6YFiP1.js`. Actual Firebase smoke 10/10 + sync smoke 9/9 cả preflight local build và production; cleanup=0, SEVERE=0. Xem section 5M và `docs/qa/2026-11-14/ROLLOUT.md`.
 - **Backlog:** `docs\TODOLIST.md`
+- **Local verified 2026-11-13:** 3 UI/UX + 2 sync findings fixed, 104/104 isolated checks + build PASS. User đã duyệt deploy ngày 14/11; trạng thái chờ duyệt của section 5L/handoff cũ được thay bởi section 5M.
 - **AI rules:** `.claude\CLAUDE.md`
+- **Rollout 2026-11-14:** user nói “rồi deploy đi”; đã push/deploy/verify production, report `docs/qa/2026-11-14/ROLLOUT.md`. Không đổi/deploy Firebase rules hoặc dependencies. Local 3113 vẫn là test double; production dùng Firestore thật.
+- **Checkpoint trước khi duyệt:** `docs/qa/2026-11-13/HANDOFF.md` giữ snapshot readback 104/104 và 10 hashes khớp. Trạng thái uncommitted/chờ duyệt tại checkpoint đó đã được thay bởi rollout ở section 5M; handoff hiện hành là `docs/qa/2026-11-14/ROLLOUT.md`.
 
 ## 1. Project structure
 
@@ -213,6 +216,38 @@ notepad app online/
 - `live-production.json`: 10/10 live production checks PASS; no error, browser SEVERE=[]; independent REST readback verifies folder deletion changes only folderId and retains note/checklist/pin/timestamps. Desktop reload, 393×852 mobile checked-state cold reload + 44px targets/no overflow, mobile empty-folder delete and UI test-note deletion PASS. `live-production.png` inspected. Test workspace cleanup notes=0/folders=0.
 - User acceptance: user reviewed localhost and reported only the rules permission failure before rollout; rules issue now resolved by live Firebase tests. Still do not claim physical-iPhone acceptance or all possible simultaneous-edit/data-loss causes fixed.
 
+## 5K. Local UI/UX audit — 2026-11-13 — REVIEW BEFORE FIX
+
+- User duyệt mở bản test local; production phải giữ nguyên đến khi local được review ổn. Server `127.0.0.1:3113`, actual components/hooks với Firebase test double, localStorage persistence; không ghi Firebase thật.
+- Chỉ tạo `scripts/qa/vite.local-audit.config.js`, `scripts/qa/firestore-local-audit.js` và report `docs/qa/2026-11-13/AUDIT.md`; source runtime/rules/root configs không sửa.
+- Manual Chrome desktop dark/light và DevTools iPhone 16 393×852: tạo/đổi tên/xóa folder giữ note; nhiều đoạn/autosave/reload; checklist Enter/Backspace/undo/redo, tick + cold reload; pin, chọn sort, Recent, search không dấu/clear, hủy xóa note đã quan sát. Không dùng mock để khẳng định Firestore sync/rules/concurrency PASS.
+- Tái hiện UI-01 tên folder ngắn bị truncate quá mạnh; UI-02 preview dính đoạn và search phrase qua hai đoạn không match; A11Y-01 editor delete button thiếu accessible name ở mobile. Report có bước tái hiện, source và thiết kế sửa đề xuất.
+- Source-only SYNC-01 same-note remote reconcile và SYNC-02 hash/listener cancellation khi đổi Sync Key cần kiểm chứng thêm. Chưa xác nhận lỗi mất dữ liệu thực tế hay sync hai thiết bị trong lượt này.
+- Chưa sửa lỗi để user review trước; giữ hai synthetic notes trong local test. Server giữ mở. Không chạy build, không commit/push/deploy; production không kiểm tra lại hôm nay. Screenshot/AX evidence ở transcript, không có ảnh local mới.
+
+## 5L. Local fixes verified — 2026-11-13 — USER REVIEW PENDING
+
+- User duyệt sửa toàn bộ findings của 5K ở local và tự test lại; chỉ deploy Vercel sau user duyệt. Toàn bộ thay đổi hiện uncommitted; production chưa tác động.
+- Folder name xuống dòng/hàng thao tác riêng; shared HTML→plain text giữ block boundaries cho search/preview; editor delete accessible name ở mobile.
+- `useNotes` bind callback vào từng workspace, cancel stale hash/listener và ẩn notes cũ ngay khi đổi key. Save editor dùng transaction so sánh baseline title/content; giữ nguyên metadata khác.
+- `useNoteDraft` nhận remote khi editor sạch; nếu dirty thì giữ draft, cảnh báo conflict và đợi chọn Dùng bản mới/Giữ bản của tôi. SessionStorage recovery scoped workspace hash/note ID; save queue + recovery ownership guard tránh save cũ xóa backup draft mới. Không coi sessionStorage là backup lâu dài.
+- Evidence cuối: `regression.json` 29/29 desktop, `regression-mobile.json` 29/29 tại 393×852, `legacy-regression.json` 25/25, `app-smoke.json` 21/21. Tổng 104/104 lượt kiểm tra trên isolated backend; desktop/mobile regression console SEVERE=0. Full-app smoke gồm hai tab, failure/recovery/reload, Sync Key switch trong debounce và note/folder delete chỉ trên disposable test data.
+- Final build `npm run build -- --outDir dist-review-20261113` PASS, 1707 modules, JS `index-4u6YFiP1.js` 841.28 kB / gzip 238.39 kB. Chunk/Browserslist warnings còn; package/rules/config production không đổi. `git diff --check` PASS. Artifact hashes + log trong QA folder.
+- Đã xem ảnh desktop, conflict, mobile folders/editor. Giữ server 3113 (HTTP 200) cho user review. QA double có ordering cho các ca local; không chứng minh Firestore thật/emulator/network/retry/offline hoặc physical iPhone PASS.
+- Report và resume: `docs/qa/2026-11-13/FIXES.md`. Source thay đổi: `src/App.jsx`, `components/FolderList.jsx`, `components/NoteList.jsx`, `components/NoteEditor.jsx`, `hooks/useNotes.js`; thêm `hooks/useNoteDraft.js`, `lib/noteText.js`. Test scripts/artifacts và progress docs được cập nhật; không đổi archive, dist cũ, user notes hoặc các artifact không liên quan.
+
+## 5M. Approved rollout — 2026-11-14 — PRODUCTION PASS
+
+- User yêu cầu deploy sau phần so sánh local/web; đây là phê duyệt commit/push/deploy bản local đã review, thay trạng thái chờ duyệt của 5L/handoff cũ.
+- Trước push: HEAD `ba122f3` đồng bộ origin/main; 10 source/build hashes vẫn khớp artifact đã kiểm thử local. Không đổi runtime source trong lượt deploy; rules/schema/dependencies/config production không đổi.
+- Actual reviewed production build được preview loopback 3114 với Firebase SDK thật: `docs/qa/2026-11-14/live-local.json` 10/10, `sync-local-final.json` 9/9; toàn bộ workspace test ngẫu nhiên cleanup notes/folders=0, console SEVERE=0. Đã xem ảnh checklist mobile và conflict desktop. Đây là evidence integration mới, tách với 104/104 checks dùng test double trước đó.
+- Sync preflight gồm nhận remote ở editor sạch, không save-back khi nhận remote, bảo toàn dirty draft/conflict/reload, explicit keep-local transaction và đổi Sync Key giữ save ở workspace cũ. Chưa kiểm chứng offline/retry mọi tình huống hoặc iPhone vật lý.
+- Một lượt đầu sync test script đọc list trước khi document mới hiện trên REST và gặp IndexError; đã sửa helper polling để chờ list có dữ liệu, không sửa source app. Artifact failure giữ local, final report mới đạt 9/9 và cleanup=0.
+- Feature `196568895b98542a30f95be119a0ea4d00d8804a` committed/pushed main; Vercel `notepad-online-cf1zs5ptv-trunknguen.vercel.app` Ready và alias production updated. Runtime `/assets/index-4u6YFiP1.js`, 841275 bytes, SHA-256 `335578c81d5828fe330701dbc3ec44c54dcca6e6bfbacf317bd60da969a80580`, byte-for-byte khớp reviewed build; không có LOCAL TEST marker/mock trong production.
+- Actual production reports `live-production.json` 10/10 và `sync-production.json` 9/9 PASS. Bao gồm folder cancel/delete giữ fields/checklist, desktop/mobile reload, mobile 393×852 layout/check persistence, real two-tab remote adoption/conflict/recovery/reload/explicit keep và key switch giữ đúng workspace. Backend REST readback độc lập, mọi test workspace notes/folders cleanup=0, error=null, browser SEVERE=0.
+- Đã xem ảnh production mobile checklist và desktop conflict. Không thử trên iPhone vật lý hoặc mọi offline/network/retry case; không khẳng định các phần chưa đo PASS. User đã cho phép rollout, không coi automated QA là physical-device acceptance.
+- `docs/qa/2026-11-14/ROLLOUT.md` là resume/handoff mới. Documentation commit tiếp theo có thể tạo Vercel deployment cùng runtime; sau push docs chỉ recheck Ready + exact bundle, không rerun suite khi source không đổi. Final alias metadata giữ trong artifact local.
+
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
@@ -220,10 +255,10 @@ Folder delete + checklist repair production PASS ngày 2026-10-31; physical-iPho
 
 ## 7. Next actions
 
-1. User acceptance Global Search + Pin + Sort + Recent (cùng compact header/checklist) trên iPhone thật.
-2. Tiếp tục bundle/code-splitting và Firestore Rules hardening.
-3. User thử lại folder delete + thao tác checklist gây lỗi trên thiết bị thật. Rollout rules/frontend và live production smoke đã hoàn tất; không auto-deploy thêm tính năng.
-4. Tiếp tục backlog feature (toast/keyboard shortcuts...); Apple Notes Sync + Vault giữ ở future design cho tới khi user bắt đầu phase đó.
+1. User có thể kiểm tra bản production mới, ưu tiên Safari/iPhone và thao tác checklist từng báo lỗi; physical-device acceptance chưa có.
+2. Real Firebase integration 19/19 đã có ở section 5M; không tự suy ra offline/retry hoặc mọi concurrent-edit scenario đều đạt.
+3. Bản sửa đã được user duyệt và deploy. Thay đổi tiếp theo vẫn cần tuân theo review/approval của user; không tự mở phase mới.
+4. Bundle/code-splitting, rules hardening, toast/shortcuts, Apple Notes Sync + Vault giữ ở backlog, không tự mở rộng scope.
 
 ## 8. Archive rule
 
@@ -232,6 +267,14 @@ Không chỉnh sửa, move, rename hoặc xóa folder này.
 Mọi công việc Notepad mặc định phải thực hiện ở project hiện tại.
 
 ## 9. Changelog
+
+- 2026-11-14: User duyệt deploy; source/test helpers commit `1965688` push main → Vercel Ready → exact-bundle verification + 19/19 actual production Firebase checks PASS; cleanup=0, SEVERE=0. Preflight reviewed build cũng 19/19. Rules/dependencies/config không đổi; rollback reference là bản `ba122f3` trước rollout, không tự rollback.
+
+- 2026-11-14: User yêu cầu lưu tiến độ; ghi resume checkpoint/handoff. Readback report 104/104, source/build hashes 10/10 khớp và localhost HTTP 200; không sửa runtime, không rerun test/build, không commit/push/deploy.
+
+- 2026-11-13: User duyệt local fixes; 3 UI/UX + 2 sync findings đã sửa, 104/104 local checks + build PASS; chờ user test/duyệt, chưa commit/push/deploy. Chi tiết 5L và `docs/qa/2026-11-13/FIXES.md`.
+
+- 2026-11-13: Local-only audit với QA backend isolated/persistent; 3 UI/UX findings + 2 source-only sync risks, chưa sửa runtime hoặc deploy. Chi tiết section 5K và `docs/qa/2026-11-13/AUDIT.md`.
 
 - 2026-10-31: User duyệt rollout sau localhost review; Firebase rules compile/release PASS; feature `2632f60` push main → Vercel `2fp75o1w8` Ready → exact-bundle verification + production live smoke 10/10 PASS; cleanup=0.
 

@@ -1,9 +1,29 @@
 # PROJECT COMMANDS — Notepad Online
 
-- Last verified: 2026-10-31 (local commands; deployment commands below are historical)
+- Last verified: 2026-11-14 local + live production; deployment sections dated 31/10 remain historical
 - Source: `package.json` + verified Firebase deployment flow.
 
+## Approved rollout 2026-11-14
+
+- `node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 3114 --strictPort --outDir dist-review-20261113` — actual reviewed production build, real Firebase; không dùng Sync Key user để destructive test ở URL này.
+- `python scripts/qa/live_smoke.py http://127.0.0.1:3114/ docs/qa/2026-11-14/live-local.json` — 10/10, cleanup=0.
+- `python scripts/qa/live_sync_smoke.py http://127.0.0.1:3114/ docs/qa/2026-11-14/sync-local-final.json` — 9/9, cleanup=0.
+- `git push origin main` — feature `1965688` triggered Vercel production Git deployment, user approved. Không force push/reset.
+- `vercel inspect notepad-online-cf1zs5ptv-trunknguen.vercel.app --wait --timeout 50s --json` — feature deployment READY, aliases contain production URL.
+- `python scripts/qa/live_smoke.py https://notepad-online-beta.vercel.app/ docs/qa/2026-11-14/live-production.json` — 10/10 actual Firebase, cleanup=0/SEVERE=0.
+- `python scripts/qa/live_sync_smoke.py https://notepad-online-beta.vercel.app/ docs/qa/2026-11-14/sync-production.json` — 9/9 actual Firebase, cleanup=0/SEVERE=0.
+- Hai script chỉ dùng disposable generated Sync Keys và cleanup đúng hash root đó. Không rerun production writes chỉ để refresh progress. Không deploy rules trong rollout này.
+
 ## Canonical npm scripts
+Local review 2026-11-13: `node node_modules/vite/bin/vite.js --config scripts/qa/vite.local-audit.config.js` — server 3113 với actual app + persistent localStorage test double, Firebase imports bị thay bằng mock; cache riêng với legacy QA 3107. Không dùng để chứng minh live Firestore sync/rules.
+
+- `python scripts/qa/run_audit_regression.py` — verified 29/29 desktop; writes `docs/qa/2026-11-13/regression.json`, screenshot/console.
+- `python scripts/qa/run_audit_regression.py mobile` — verified 29/29 at 393×852; writes `regression-mobile.json`, screenshot/console.
+- `python scripts/qa/app_smoke.py` — verified 21/21 actual-app isolated smoke; two tabs, save failure/recovery, workspace switch, mobile, CRUD; writes `app-smoke.json` and screenshots.
+- Legacy server command dưới + `python scripts/qa/regression.py docs/qa/2026-11-13/legacy-regression.json` — 25/25 final rerun; select compatible DRIVER if needed.
+- `npm run build -- --outDir dist-review-20261113` — PASS, separate build; chunk/Browserslist warnings remain. Không tự deploy output này.
+- Reruns overwrite only these named QA reports, not historical 31/10 outputs. Scripts use disposable browser profiles/test workspaces; không chạy live-production smoke cho local review.
+
 `npm run dev` — chạy Vite dev server.
 `npm run build` — build production bằng Vite.
 `npm run preview` — preview output build.

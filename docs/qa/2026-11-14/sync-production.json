@@ -1,0 +1,63 @@
+{
+  "url": "https://notepad-online-beta.vercel.app/",
+  "environment": "actual production bundle + Firebase SDK + real Firestore; disposable workspaces only",
+  "results": [
+    {
+      "name": "both_workspaces_start_empty",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "transaction_save_persists_real_firestore",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "real_two_tab_clean_remote_adoption",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "clean_remote_update_does_not_write_back",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "real_remote_conflict_keeps_local_draft",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "conflict_draft_survives_reload_real_backend",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "explicit_keep_local_transaction_succeeds",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "second_tab_receives_confirmed_save",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "key_switch_preserves_original_workspace_save",
+      "pass": true,
+      "evidence": null
+    }
+  ],
+  "error": null,
+  "cleanup": {
+    "e7508e0d8b2388094481e447c273f9cd217a5d98145adc01b1be5d2a589da774/notes": 0,
+    "e7508e0d8b2388094481e447c273f9cd217a5d98145adc01b1be5d2a589da774/folders": 0,
+    "c224222b0574204e24afff94eb7140df1695d7d2e763a83591f0875bb2ac779b/notes": 0,
+    "c224222b0574204e24afff94eb7140df1695d7d2e763a83591f0875bb2ac779b/folders": 0
+  },
+  "console": [],
+  "browser": "157.0.8103.52",
+  "scripts": [
+    "/assets/index-4u6YFiP1.js"
+  ]
+}

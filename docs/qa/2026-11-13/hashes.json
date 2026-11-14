@@ -1,0 +1,42 @@
+﻿[
+    {
+        "Path":  "src/App.jsx",
+        "SHA256":  "BF1611670489A83601F1AB4D680B6715FBC9BE86F819BE1A7CAEEB29DFE9BE61"
+    },
+    {
+        "Path":  "src/components/FolderList.jsx",
+        "SHA256":  "145A173B3D0ABA478B62FBE9E85D5E38AB70ED3554EE3605BE81D985F02D02B0"
+    },
+    {
+        "Path":  "src/components/NoteList.jsx",
+        "SHA256":  "BE35DD1881F9E0A5D27B43D8E555A8C30BB01B7526A2C3EE82E6F43F49B52AB1"
+    },
+    {
+        "Path":  "src/components/NoteEditor.jsx",
+        "SHA256":  "91CACB2B5CF3B76FDDD46A14F2C9451CF411DACFB0EAC4887D25288BE6B30431"
+    },
+    {
+        "Path":  "src/hooks/useNotes.js",
+        "SHA256":  "4ADC0030ACB413A63A7D384D18265B9BC202E2A759DE8F18AD48BE1902F7A284"
+    },
+    {
+        "Path":  "src/hooks/useNoteDraft.js",
+        "SHA256":  "F0C6FD35ABA16C0606AC7B588545D603FACF20F7921E9152CE247209CF901BC7"
+    },
+    {
+        "Path":  "src/lib/noteText.js",
+        "SHA256":  "7E4439A36055D9E07362AD32895873EFC9470DDD9D24D17D9ECCFE2F502A8763"
+    },
+    {
+        "Path":  "dist-review-20261113/index.html",
+        "SHA256":  "9C5A4D968B1DE71D532274037D404F59469889919CFDD64CD5698BFDF50F4A93"
+    },
+    {
+        "Path":  "dist-review-20261113/assets/index-4u6YFiP1.js",
+        "SHA256":  "335578C81D5828FE330701DBC3EC44C54DCCA6E6BFBACF317BD60DA969A80580"
+    },
+    {
+        "Path":  "dist-review-20261113/assets/index-FcK6nMYa.css",
+        "SHA256":  "F66DE1FBD49E74D7F2B8F8CBBAC5F828ADCC71E115E1B3D3D335EA05B4942E3C"
+    }
+]

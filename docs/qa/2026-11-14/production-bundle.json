@@ -1,0 +1,10 @@
+{
+  "url": "https://notepad-online-beta.vercel.app",
+  "asset": "/assets/index-4u6YFiP1.js",
+  "status": 200,
+  "bytes": 841275,
+  "sha256": "335578c81d5828fe330701dbc3ec44c54dcca6e6bfbacf317bd60da969a80580",
+  "exactLocalMatch": true,
+  "featureCommit": "196568895b98542a30f95be119a0ea4d00d8804a",
+  "featureDeployment": "notepad-online-cf1zs5ptv-trunknguen.vercel.app"
+}

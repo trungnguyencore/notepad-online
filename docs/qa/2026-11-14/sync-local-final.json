@@ -1,0 +1,63 @@
+{
+  "url": "http://127.0.0.1:3114/",
+  "environment": "actual production bundle + Firebase SDK + real Firestore; disposable workspaces only",
+  "results": [
+    {
+      "name": "both_workspaces_start_empty",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "transaction_save_persists_real_firestore",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "real_two_tab_clean_remote_adoption",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "clean_remote_update_does_not_write_back",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "real_remote_conflict_keeps_local_draft",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "conflict_draft_survives_reload_real_backend",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "explicit_keep_local_transaction_succeeds",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "second_tab_receives_confirmed_save",
+      "pass": true,
+      "evidence": null
+    },
+    {
+      "name": "key_switch_preserves_original_workspace_save",
+      "pass": true,
+      "evidence": null
+    }
+  ],
+  "error": null,
+  "cleanup": {
+    "cbee73882810de59f5515adb3a5cc951822e13d0e300d29a4a30aee30e2196c1/notes": 0,
+    "cbee73882810de59f5515adb3a5cc951822e13d0e300d29a4a30aee30e2196c1/folders": 0,
+    "1598add556d26ed82fc5964c87f99afd21a4462c726c57d90045f2a0898f96cc/notes": 0,
+    "1598add556d26ed82fc5964c87f99afd21a4462c726c57d90045f2a0898f96cc/folders": 0
+  },
+  "console": [],
+  "browser": "157.0.8103.52",
+  "scripts": [
+    "/assets/index-4u6YFiP1.js"
+  ]
+}

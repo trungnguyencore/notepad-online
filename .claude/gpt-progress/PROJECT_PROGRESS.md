@@ -1,8 +1,11 @@
-# PROJECT PROGRESS — GPT RESUME
+﻿# PROJECT PROGRESS — GPT RESUME
 
-- Last verified: 2026-10-31 (production rollout + live smoke PASS)
+- Last verified: 2026-11-14 (production rollout + real Firebase 19/19 PASS)
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current phase: Folder delete + checklist repair production PASS sau user local review. Rules compile/release PASS; feature `2632f60` pushed main, Vercel `2fp75o1w8` Ready, exact local bundle `index-BLTcuew3.js`; 10/10 local-live + 10/10 production-live PASS, cleanup=0, SEVERE=[]. Xem canonical section 5J và handoff.
+- Current rollout 2026-11-14: USER APPROVED “rồi deploy đi”, canonical 5M. Feature `1965688` pushed main → Vercel `cf1zs5ptv` READY, alias serves exact reviewed bundle `index-4u6YFiP1.js`; production real SDK/Firestore 10/10 + 9/9 PASS, cleanup=0, SEVERE=0. Latest handoff `docs/qa/2026-11-14/ROLLOUT.md`; pending-review notes below are historical.
+- Checkpoint saved 2026-11-14: `docs/qa/2026-11-13/HANDOFF.md`; source/build hashes 10/10 match and report readback 104/104, localhost 3113 HTTP 200. These are checkpoint checks, not new test runs. Next: user test/duyệt local; chưa commit/push/deploy.
+- Local QA update verified 2026-11-13: canonical 5L + `docs/qa/2026-11-13/FIXES.md`; 3 UI/UX + 2 sync findings đã sửa. 29 desktop + 29 mobile + 25 legacy + 21 full-app = 104/104 local checks; final build PASS. Local 3113 dùng persistent mock, không Firebase thật. Chưa commit/push/deploy; source uncommitted.
+- Current phase: production rollout complete, source committed; evidence/handoff saved for resume. Recovery draft/conflict flow/workspace guard và UI fixes đã lên web. Live evidence ở QA 14/11 tách với 104/104 isolated checks; physical-iPhone và mọi offline/retry scenarios vẫn chưa xác nhận. Không tự mở scope mới.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
