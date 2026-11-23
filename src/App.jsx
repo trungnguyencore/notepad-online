@@ -295,7 +295,7 @@ export default function App() {
                         </div>
                     )}
 
-                    <main className="grid grid-cols-1 gap-4 lg:grid-cols-[220px_300px_minmax(0,1fr)]">
+                    <main className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_300px_minmax(0,1fr)]">
                         <aside className={`${selectedFolderId ? 'hidden lg:block' : 'block'} h-[calc(100dvh-180px)] min-h-[420px] rounded-2xl bg-apple-bg-secondary p-3 shadow-sm`}>
                             <FolderList
                                 folders={folders}
