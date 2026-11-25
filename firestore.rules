@@ -20,6 +20,11 @@ service cloud.firestore {
         // Client moves notes to Unfiled first; deleting metadata never deletes notes.
         allow delete: if true;
       }
+
+      // Ảnh đính kèm trong note được tách document riêng để không làm note vượt trần 1 MiB.
+      match /images/{imageId} {
+        allow read, write: if true;
+      }
     }
     
     // Từ chối mọi truy cập khác

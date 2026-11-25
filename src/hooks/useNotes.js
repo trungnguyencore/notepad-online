@@ -1,9 +1,10 @@
-﻿import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { db } from '../lib/firebase';
 import {
   collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot,
   serverTimestamp, query, orderBy, runTransaction,
 } from 'firebase/firestore';
+import { deleteWorkspaceImage, extractImageIdsFromHtml } from '../lib/noteImages';
 
 async function hashKey(key) {
   const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
@@ -15,6 +16,8 @@ export function useNotes(syncKey) {
   // resolve its destination using the newly selected workspace's hash.
   const workspace = useMemo(() => ({ key: syncKey, hash: null }), [syncKey]);
   const [state, setState] = useState({ workspace, notes: [], loading: true, error: null });
+  const latestNotesRef = useRef([]);
+  latestNotesRef.current = state.workspace === workspace ? state.notes : [];
   const fail = useCallback((err) => {
     setState(current => current.workspace === workspace ? { ...current, error: err.message } : current);
   }, [workspace]);
@@ -109,7 +112,19 @@ export function useNotes(syncKey) {
   const deleteNote = useCallback(async noteId => {
     if (!workspace.hash) return false;
     try {
+      const target = latestNotesRef.current.find(item => item.id === noteId);
+      const candidateIds = extractImageIdsFromHtml(target?.content);
+      const sharedIds = new Set(
+        latestNotesRef.current
+          .filter(item => item.id !== noteId)
+          .flatMap(item => extractImageIdsFromHtml(item.content))
+      );
+      const orphanIds = candidateIds.filter(id => !sharedIds.has(id));
+
       await deleteDoc(doc(db, 'sync_data', workspace.hash, 'notes', noteId));
+      if (orphanIds.length) {
+        void Promise.allSettled(orphanIds.map(id => deleteWorkspaceImage(workspace.hash, id)));
+      }
       return true;
     } catch (err) { fail(err); return false; }
   }, [workspace, fail]);

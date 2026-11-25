@@ -1,4 +1,4 @@
-﻿// In-memory Firestore double. This does not validate deployed Firebase rules.
+// In-memory Firestore double. This does not validate deployed Firebase rules.
 // LOCAL AUDIT ONLY. Same app components, no Firebase connection.
 const STORAGE = 'notepad-local-audit-v1';
 const encode = () => JSON.stringify({ nextId, entries: [...records] }, (_key, value) => value?.toDate ? { __auditDate: value.toDate().toISOString() } : value);
@@ -34,9 +34,25 @@ function read(ref) {
   }
   return { docs, size: docs.length, empty: !docs.length };
 }
-function emit() { localStorage.setItem(STORAGE, encode()); for (const l of listeners) l.fn(read(l.ref)); }
+function emit() {
+  try { localStorage.setItem(STORAGE, encode()); } catch { /* localStorage quota full for large images; keep in-memory store active */ }
+  for (const l of listeners) l.fn(read(l.ref));
+}
+async function maybeSimulateImageIo(path) {
+  if (!path.includes('/images')) return;
+  const delay = Number(window.firestoreQA?.imageDelayMs || 0);
+  if (delay > 0) await new Promise(resolve => setTimeout(resolve, delay));
+  if (window.firestoreQA?.failImages) throw Error('simulated image network failure');
+}
+export async function getDoc(ref) {
+  await maybeSimulateImageIo(ref.path);
+  return snapshot(ref);
+}
 export function onSnapshot(ref, fn) { const l = {ref, fn}; listeners.add(l); fn(read(ref)); return () => listeners.delete(l); }
-export async function addDoc(ref, data) { const result = {path: `${ref.path}/qa${nextId++}`}; records.set(result.path, {...data}); emit(); return {...result, id: result.path.split('/').at(-1)}; }
+export async function addDoc(ref, data) {
+  await maybeSimulateImageIo(ref.path);
+  const result = {path: `${ref.path}/qa${nextId++}`}; records.set(result.path, {...data}); emit(); return {...result, id: result.path.split('/').at(-1)};
+}
 export async function updateDoc(ref, data) { if (!records.has(ref.path)) throw Error('missing document'); records.set(ref.path, {...records.get(ref.path), ...data}); emit(); }
 export async function deleteDoc(ref) { records.delete(ref.path); emit(); }
 export async function getDocsFromServer(ref) {
@@ -62,7 +78,7 @@ export async function runTransaction(_db, fn) {
   emit();
   return result;
 }
-window.firestoreQA = { records, stamp, fail: false, emit, transactions: [] };
+window.firestoreQA = { records, stamp, fail: false, failImages: false, imageDelayMs: 0, emit, transactions: [] };
 
 window.addEventListener('storage', event => {
   if (event.key !== STORAGE || !event.newValue) return;

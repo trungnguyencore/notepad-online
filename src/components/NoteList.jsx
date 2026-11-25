@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronLeft, Pin, Plus, Search, Trash2, X } from 'lucide-react';
-import { getPlainText } from '../lib/noteText';
+import { getPlainText, hasImages } from '../lib/noteText';
 
 const SORT_STORAGE = 'notepad-note-sort';
 
@@ -255,6 +255,8 @@ export default function NoteList({
                                         <p className="text-note-caption text-apple-text-secondary truncate">
                                             {preview ? (
                                                 <HighlightedText text={preview} query={searchQuery} />
+                                            ) : hasImages(note.content) ? (
+                                                '[Hình ảnh]'
                                             ) : (
                                                 'Nội dung đang trống'
                                             )}

@@ -344,6 +344,7 @@ export default function App() {
                                 <NoteEditor
                                     key={`${syncKey}:${selectedNote.id}`}
                                     note={selectedNote}
+                                    workspaceId={workspaceId}
                                     draftStorageKey={`notepad-draft:${workspaceId}:${selectedNote.id}`}
                                     folders={folders}
                                     onUpdate={updateNote}

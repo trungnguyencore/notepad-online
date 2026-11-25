@@ -10,3 +10,7 @@ export function getPlainText(content) {
         });
     return (document.body.textContent || '').replace(/\s+/g, ' ').trim();
 }
+
+export function hasImages(content) {
+    return /<img\b/i.test(String(content || ''));
+}

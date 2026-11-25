@@ -20,6 +20,7 @@ function read(ref) {
   return { docs, size: docs.length, empty: !docs.length };
 }
 function emit() { for (const l of listeners) l.fn(read(l.ref)); }
+export async function getDoc(ref) { return snapshot(ref); }
 export function onSnapshot(ref, fn) { const l = {ref, fn}; listeners.add(l); fn(read(ref)); return () => listeners.delete(l); }
 export async function addDoc(ref, data) { const result = {path: `${ref.path}/qa${nextId++}`}; records.set(result.path, {...data}); emit(); return {...result, id: result.path.split('/').at(-1)}; }
 export async function updateDoc(ref, data) { if (!records.has(ref.path)) throw Error('missing document'); records.set(ref.path, {...records.get(ref.path), ...data}); emit(); }
