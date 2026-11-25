@@ -1,8 +1,8 @@
 # PROJECT PROGRESS — Notepad Online
 
-- **Last verified:** 2026-11-14 (production rollout + 19/19 actual Firebase checks PASS)
+- **Last verified:** 2026-11-25 production rollout (`75861f4`: 5N image support + 5O editor polish); `firestore.rules` deployed on `notepad-app-6845e`, `npm run build` PASS, user manual local review PASS, Vercel `notepad-online-d2601ikk3-trunknguen.vercel.app` Ready & exact bundle verified on `https://notepad-online-beta.vercel.app` (automated live Firebase Selenium / physical iPhone suite not re-run in this rollout; last automated real-Firebase suite 2026-11-14 `1965688`, 19/19 PASS)
 - **Root:** `D:\OTHERS\LATVAT\notepad app online`
-- **Status:** Local fixes đã được user duyệt và rollout production PASS. Feature `1965688` pushed main; Vercel `cf1zs5ptv` Ready; alias `https://notepad-online-beta.vercel.app` phục vụ exact reviewed bundle `index-4u6YFiP1.js`. Actual Firebase smoke 10/10 + sync smoke 9/9 cả preflight local build và production; cleanup=0, SEVERE=0. Xem section 5M và `docs/qa/2026-11-14/ROLLOUT.md`.
+- **Status:** Production đang chạy bản mới nhất `75861f4` (`index-CKZ8xk0u.js` / `index-1zSoJxDc.css`) tại `https://notepad-online-beta.vercel.app` — gồm tính năng dán/kéo-thả/chèn ảnh trong note (5N) và nâng cấp editor toolbar (`Aa` custom dropdown, Apple Notes animated checklist, khôi phục dấu Bullet/Ordered list, Việt hóa tooltip) (5O). Đã deploy `firestore.rules` (`/images/{imageId}`) lên `notepad-app-6845e` trước khi push Vercel. Xem section 5N & 5O.
 - **Backlog:** `docs\TODOLIST.md`
 - **Local verified 2026-11-13:** 3 UI/UX + 2 sync findings fixed, 104/104 isolated checks + build PASS. User đã duyệt deploy ngày 14/11; trạng thái chờ duyệt của section 5L/handoff cũ được thay bởi section 5M.
 - **AI rules:** `.claude\CLAUDE.md`
@@ -248,16 +248,49 @@ notepad app online/
 - Đã xem ảnh production mobile checklist và desktop conflict. Không thử trên iPhone vật lý hoặc mọi offline/network/retry case; không khẳng định các phần chưa đo PASS. User đã cho phép rollout, không coi automated QA là physical-device acceptance.
 - `docs/qa/2026-11-14/ROLLOUT.md` là resume/handoff mới. Documentation commit tiếp theo có thể tạo Vercel deployment cùng runtime; sau push docs chỉ recheck Ready + exact bundle, không rerun suite khi source không đổi. Final alias metadata giữ trong artifact local.
 
+## 5N. Image paste & upload support — 2026-11-20 — LOCAL ONLY, USER REVIEW PENDING
+
+- User yêu cầu triển khai bản test local cho tính năng dán ảnh vào note, vá các rủi ro mạng yếu và tự kiểm thử cả mobile; **không deploy** cho tới khi user kiểm tra local và duyệt.
+- **Kiến trúc (Phương án B — 100% Free trên Firestore Spark):**
+  - Ảnh được xử lý/nén ở client trong `src/lib/noteImages.js` (ưu tiên WebP, fallback JPEG cho Safari, giữ nguyên GIF/ảnh nhỏ sắc nét; tự động resize tối đa 1600px và hạ bậc nén để đảm bảo ≤ 720 KB/ảnh, an toàn dưới trần 1 MiB của Firestore).
+  - Lưu tách mỗi ảnh thành document riêng tại `sync_data/{hash}/images/{imageId}`; `note.content` chỉ lưu `<img data-image-id="..." alt="..." width="..." height="...">` (không lưu base64 inline vào note) nên không ảnh hưởng `onSnapshot` list, Global Search, `sessionStorage` draft recovery hay conflict transaction.
+  - Cài `@tiptap/extension-image@2.27.2` (đồng bộ runtime line 2.27.2) và mở rộng thành `NoteImage` (`src/components/NoteImageExtension.jsx`) với React NodeView lazy-load + RAM cache, skeleton trạng thái tải, fallback lỗi + nút `Thử lại`, Lightbox xem toàn màn hình (double-click hoặc nút phóng to, đóng bằng `Esc`/nút `×`) và nút xóa ảnh (giữ doc ảnh để `Ctrl+Z` hoàn tác được ngay).
+  - `src/components/NoteEditor.jsx`: hỗ trợ `Ctrl+V`/`Cmd+V` (clipboard files & `data:image/` HTML), kéo-thả ảnh (drag & drop có viền highlight), nút Toolbar `Chèn ảnh` (`ImagePlus`, 44×44, hiển thị ngay trong viewport iPhone 393px không cần cuộn), chèn ngay dưới ảnh đang chọn thay vì ghi đè `NodeSelection`, và bọc `setContent` trong `queueMicrotask` tránh cảnh báo React 18 `flushSync` khi đồng bộ remote 2 tab.
+  - Xử lý mạng yếu: timeout 25s cho `uploadWorkspaceImage` / `loadWorkspaceImage`, tự xóa doc nếu write chậm hoàn tất sau timeout, và tự dừng + xóa ảnh thừa nếu user rời note giữa lúc đang upload.
+  - `src/hooks/useNotes.js`: `deleteNote` tự dọn các doc ảnh trong `sync_data/{hash}/images` không còn được note nào khác trong workspace tham chiếu.
+  - `src/lib/noteText.js` + `src/components/NoteList.jsx`: thêm `hasImages(content)` để note chỉ có ảnh hiển thị preview `[Hình ảnh]` thay vì `Nội dung đang trống`.
+  - `firestore.rules`: đã thêm `match /images/{imageId} { allow read, write: if true; }` (chỉ mới sửa file local, **CHƯA deploy**).
+  - `scripts/qa/firestore-local-audit.js` & `scripts/qa/firestore-mock.js`: bổ sung `getDoc` + hook `imageDelayMs`/`failImages` phục vụ QA local.
+- **Kết quả kiểm thử local (isolated test double `127.0.0.1:3113`, KHÔNG gọi Firebase thật):**
+  - `npm run build` PASS: 1710 modules, CSS `24.12 kB` / `5.64 kB` gzip, JS `index-DlfS2s-b.js` `868.70 kB` / `246.57 kB` gzip; `git -c core.safecrlf=false diff --check` PASS.
+  - Selenium E2E (desktop 1440×960 + mobile 393×852 + 430×932): **19/19 PASS**, `console SEVERE = []` — gồm nén ảnh 2200×1500→1600×1091 WebP 582 KB, chọn nhiều ảnh + drag-drop + icon nhỏ 48×48 (`min-width: 112px`), double-click Lightbox + `Esc`, sync ảnh realtime 2 tab + conflict `Dùng bản mới`, lỗi upload/load + nút `Thử lại`, timeout upload + dọn late write, đổi note giữa upload + dọn ảnh thừa, mobile 393px nút `Chèn ảnh` thấy ngay không cần cuộn + zero overflow + mọi nút `44×44` + `button button = 0`, mobile 430px cold reload giữ ảnh, xóa note dọn sạch ảnh về 0. Đã xem trực tiếp screenshot desktop & mobile 393px (editor + lightbox).
+  - Chưa kiểm chứng Firebase Firestore thật, `firestore.rules` deploy thật và iPhone Safari vật lý.
+- **Trạng thái hiện tại:** Đã được user duyệt gộp deploy lên production ngày 2026-11-25 cùng các chỉnh sửa UI editor ở section **5O** (`firestore.rules` deploy trước lên `notepad-app-6845e` → commit `75861f4` → Vercel Ready).
+
+## 5O. Editor UI polish & combined production rollout — 2026-11-25 — PRODUCTION PASS
+
+- User review trực tiếp trên `http://localhost:3000/`, xác nhận ổn và yêu cầu push + deploy lên web + cập nhật tiến độ.
+- **Thay đổi trong `src/components/NoteEditor.jsx` & `src/index.css`:**
+  - **Custom dropdown `Aa` (`TextStyleSelect`):** thay `<select>` mặc định (bị chữ trắng trên nền popup trắng ở Dark Mode Windows) bằng menu render qua `createPortal(..., document.body)` tránh bị thanh toolbar `overflow-x-auto` cắt trên mobile; hiển thị preview cỡ chữ cho `Văn bản thường (Aa)`, `Tiêu đề lớn (H1)`, `Tiêu đề vừa (H2)`, `Tiêu đề nhỏ (H3)` kèm dấu tick trạng thái đang chọn, đóng bằng `Esc`/click ngoài/resize, giữ selection khi bấm (`onMouseDown` `preventDefault`). Bổ sung `color-scheme: light` / `color-scheme: dark` trong `:root` / `.dark` để các `<select>` gốc (`FolderPicker.jsx`) cũng đồng bộ Dark Mode.
+  - **Checklist kiểu Apple Notes:** giữ nguyên DOM/HTML `TaskList`/`TaskItem` để tương thích 100% dữ liệu cũ; thay checkbox vuông mặc định bằng ô tròn viền mảnh, hover ánh vàng, bấm tick có animation nảy (`taskCheckPop`), vòng lan sáng (`taskCheckRipple`), đổ nền vàng `#FFD60A` + vẽ nét dấu `✓` SVG qua `clip-path`, chữ mờ dần + gạch ngang, giữ hit-target `44×44px` trên mobile/coarse pointer và hỗ trợ `prefers-reduced-motion: reduce`.
+  - **Khôi phục Bullet List & Ordered List + Việt hóa toolbar:** bật lại `list-style-type` (`disc`/`circle`/`square` cho `ul:not([data-type="taskList"])`, `decimal`/`lower-alpha`/`lower-roman` cho `ol`) vốn bị Tailwind Preflight reset về `none`; đồng bộ tooltip/aria-label tiếng Việt (`In đậm`, `In nghiêng`, `Gạch chân`, `Danh sách việc cần làm`, `Chèn ảnh`, `Danh sách gạch đầu dòng`, `Danh sách đánh số`, `Trích dẫn`).
+- **Rollout & xác minh production (gộp 5N + 5O):**
+  - `npm run build`: PASS (`1710` modules, `dist/assets/index-CKZ8xk0u.js` `871,636` bytes / `247.40 kB` gzip, `dist/assets/index-1zSoJxDc.css` `28,904` bytes / `6.64 kB` gzip); `git -c core.safecrlf=false diff --check` PASS.
+  - **Firebase `firestore.rules`:** `npx --yes firebase-tools@latest deploy --only firestore:rules --project notepad-app-6845e --non-interactive` compile và release PASS lên `cloud.firestore` (bật `/images/{imageId}`) **trước** khi push frontend.
+  - **GitHub & Vercel:** feature commit `75861f43a70cc857645df323dae7649fcc225321` (`75861f4`, 13 files) pushed `origin/main` (sau khi GitHub hết lỗi 500 tạm thời trong sự cố `Investigating degraded experiences across GitHub products`). Vercel auto-deploy `https://notepad-online-d2601ikk3-trunknguen.vercel.app` (`dpl_J4Wu6xhoLp3yfjoDWA5mDuJJZtBK`) `READY` trong `11.0s`, cập nhật alias `https://notepad-online-beta.vercel.app`.
+  - **Exact bundle verification:** `Invoke-WebRequest` trên `https://notepad-online-beta.vercel.app` trả HTTP `200`; serving đúng `/assets/index-CKZ8xk0u.js` (`871,636` bytes, SHA-256 `86d2dc517eb2cc7442cb405264d51c6b76f08e5edf9f9cd3afb9c66a8f6d6acc`) và `/assets/index-1zSoJxDc.css` (`28,904` bytes, SHA-256 `ca955af249e660b6e960218dce996a10d9ca5b9c5232f64de3b9b82831f52d68`) khớp byte-for-byte với local build.
+  - **Giới hạn phạm vi kiểm chứng:** không chạy lại bộ Selenium live Firebase hoặc test trên iPhone vật lý trong lượt rollout này (tính năng ảnh 5N giữ evidence Selenium isolated 19/19 PASS ngày 2026-11-20; phần 5O do user kiểm thử trực tiếp trên local trước khi duyệt deploy).
+
 ## 6. Current backlog
 
 Backlog chi tiết nằm tại `docs\TODOLIST.md`.
-Folder delete + checklist repair production PASS ngày 2026-10-31; physical-iPhone original-symptom acceptance còn chờ. Global Search, Pin + Sort + Recent, compact header, folder create/rename và branding logo giữ evidence rollout trước đó. Bundle/code-splitting, Firestore Rules hardening, toast/shortcuts và Apple Notes Sync + Vault vẫn còn backlog.
+Folder delete + checklist repair production PASS ngày 2026-10-31; physical-iPhone original-symptom acceptance còn chờ. Global Search, Pin + Sort + Recent, compact header, folder create/rename, branding logo, image uploads (5N) và editor UI polish (5O) đã rollout production. Bundle/code-splitting, Firestore Rules hardening, toast/shortcuts và Apple Notes Sync + Vault vẫn còn backlog.
 
 ## 7. Next actions
 
-1. User có thể kiểm tra bản production mới, ưu tiên Safari/iPhone và thao tác checklist từng báo lỗi; physical-device acceptance chưa có.
-2. Real Firebase integration 19/19 đã có ở section 5M; không tự suy ra offline/retry hoặc mọi concurrent-edit scenario đều đạt.
-3. Bản sửa đã được user duyệt và deploy. Thay đổi tiếp theo vẫn cần tuân theo review/approval của user; không tự mở phase mới.
+1. Nhắc user hard-refresh / reload tab cũ trên trình duyệt hoặc điện thoại để nhận bundle mới nhất (`index-CKZ8xk0u.js`) trên `https://notepad-online-beta.vercel.app`.
+2. Nếu cần verify tự động với Firebase thật cho tính năng dán/tải ảnh trên production, chạy smoke test riêng bằng disposable Sync Key và cleanup về 0.
+3. Không tự commit/push/deploy hoặc mở rộng scope khi user chưa yêu cầu rõ.
 4. Bundle/code-splitting, rules hardening, toast/shortcuts, Apple Notes Sync + Vault giữ ở backlog, không tự mở rộng scope.
 
 ## 8. Archive rule
@@ -267,6 +300,10 @@ Không chỉnh sửa, move, rename hoặc xóa folder này.
 Mọi công việc Notepad mặc định phải thực hiện ở project hiện tại.
 
 ## 9. Changelog
+
+- 2026-11-25: Hoàn tất chỉnh sửa UI editor theo góp ý user (5O: custom portal dropdown `Aa` với preview cỡ chữ & `color-scheme` dark/light, checklist tròn có animation phong cách Apple Notes, khôi phục marker Bullet/Ordered list và Việt hóa tooltip toolbar) và gộp rollout production cùng tính năng dán/tải ảnh (5N). User đã kiểm tra local và duyệt deploy: `npm run build` PASS (`index-CKZ8xk0u.js` / `index-1zSoJxDc.css`), deploy `firestore.rules` (`/images/{imageId}`) lên `notepad-app-6845e` PASS, commit `75861f4` push `main`, Vercel `notepad-online-d2601ikk3-trunknguen.vercel.app` Ready và `https://notepad-online-beta.vercel.app` khớp byte-for-byte JS/CSS bundle (không chạy lại automated live Firebase Selenium hay physical iPhone suite trong lượt này).
+
+- 2026-11-20: Triển khai tính năng paste/drag-drop/upload ảnh trong note ở **LOCAL ONLY** (Phương án B: tách `sync_data/{hash}/images/{imageId}` + nén WebP/JPEG client + TipTap `NoteImage` NodeView + Lightbox + timeout 25s & dọn ảnh thừa khi timeout/đổi note giữa chừng + sửa `NodeSelection` paste overwrite & React 18 `flushSync`). `npm run build` PASS (`index-DlfS2s-b.js`, 1710 modules), Selenium local desktop+mobile 19/19 PASS, `SEVERE=0`. Đã tắt server local `3113` và lưu tiến độ chờ user check/duyệt hôm sau; chưa commit/push/deploy rules hoặc web.
 
 - 2026-11-14: User duyệt deploy; source/test helpers commit `1965688` push main → Vercel Ready → exact-bundle verification + 19/19 actual production Firebase checks PASS; cleanup=0, SEVERE=0. Preflight reviewed build cũng 19/19. Rules/dependencies/config không đổi; rollback reference là bản `ba122f3` trước rollout, không tự rollback.
 

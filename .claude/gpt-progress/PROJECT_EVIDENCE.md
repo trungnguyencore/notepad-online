@@ -1,7 +1,24 @@
 # PROJECT EVIDENCE — Notepad Online
 
-- Last verified: 2026-11-14 production; older rollout sections below are historical
+- Last verified: 2026-11-25 production rollout (`75861f4`: 5N image support + 5O editor polish); production last automated real-Firebase suite 2026-11-14
 - Canonical progress: `docs\PROJECT_PROGRESS.md`
+
+## Combined image + editor polish production rollout — 2026-11-25 — PASS
+
+- Canonical 5O + 5N: user kiểm tra local tại `http://localhost:3000/` và duyệt push + deploy web.
+- `npm run build` PASS: 1710 modules, CSS `dist/assets/index-1zSoJxDc.css` `28,904` bytes (`6.64 kB` gzip, SHA-256 `ca955af249e660b6e960218dce996a10d9ca5b9c5232f64de3b9b82831f52d68`), JS `dist/assets/index-CKZ8xk0u.js` `871,636` bytes (`247.40 kB` gzip, SHA-256 `86d2dc517eb2cc7442cb405264d51c6b76f08e5edf9f9cd3afb9c66a8f6d6acc`); `git -c core.safecrlf=false diff --check` PASS.
+- Firebase `firestore.rules` compile + release PASS lên `notepad-app-6845e` (`npx --yes firebase-tools@latest deploy --only firestore:rules --project notepad-app-6845e --non-interactive`) trước khi push frontend.
+- Feature commit `75861f43a70cc857645df323dae7649fcc225321` (`75861f4`, 13 files) pushed `origin/main` → Vercel `https://notepad-online-d2601ikk3-trunknguen.vercel.app` (`dpl_J4Wu6xhoLp3yfjoDWA5mDuJJZtBK`) `READY` (11.0s), aliases include `https://notepad-online-beta.vercel.app`.
+- Live production verification (`Invoke-WebRequest` trên `https://notepad-online-beta.vercel.app`): HTML HTTP 200; live `/assets/index-CKZ8xk0u.js` (HTTP 200, `871,636` bytes, SHA-256 match) và `/assets/index-1zSoJxDc.css` (HTTP 200, `28,904` bytes, SHA-256 match) khớp byte-for-byte với local build; đã xác nhận các marker `Văn bản thường`, `Chèn ảnh`, `Danh sách gạch đầu dòng`, `taskCheckPop`, `taskCheckRipple`, `color-scheme`.
+- Scope note: không chạy lại automated live Firebase Selenium suite hay test iPhone vật lý trong lượt rollout này.
+
+## Local image paste & upload — 2026-11-20 — ISOLATED QA (DEPLOYED IN 5O ON 2026-11-25)
+
+- Canonical 5N: Phương án B tách `sync_data/{hash}/images/{imageId}`, cài `@tiptap/extension-image@2.27.2`, tạo `src/lib/noteImages.js` + `src/components/NoteImageExtension.jsx`, cập nhật `NoteEditor.jsx`, `NoteList.jsx`, `App.jsx`, `useNotes.js`, `noteText.js`, `index.css`, `firestore.rules` (local only) và test doubles `scripts/qa/firestore-local-audit.js`, `scripts/qa/firestore-mock.js`.
+- `npm run build` PASS: 1710 modules, CSS `24.12 kB` / `5.64 kB` gzip, JS `index-DlfS2s-b.js` `868.70 kB` / `246.57 kB` gzip; `git -c core.safecrlf=false diff --check` PASS.
+- Selenium local isolated E2E (`127.0.0.1:3113`, persistent test double, không gọi Firebase thật): **19/19 PASS**, `console SEVERE = []` — gồm nén 2200×1500→1600×1091 WebP 582 KB (`data-image-id` trong HTML, không base64), multi-upload + drag-drop + icon nhỏ 48×48 (`min-width: 112px`), double-click Lightbox + `Esc`, sync 2 tab + conflict `Dùng bản mới`, lỗi upload/load + `Thử lại`, timeout 25s + dọn late write, đổi note giữa upload + dọn ảnh thừa, mobile `393×852` nút `Chèn ảnh` nằm trong viewport (`282..326px`) + `scrollWidth=393` + mọi nút `44×44` + `nestedButtons=0`, mobile `430×932` cold reload giữ ảnh, xóa note dọn sạch ảnh về 0.
+- Đã kiểm tra trực tiếp screenshot desktop & mobile 393px; đã fix lỗi `NodeSelection` paste overwrite và cảnh báo React 18 `flushSync`.
+- Server `127.0.0.1:3113` đã tắt sạch (`PORT_3113_CLOSED`). Chưa commit/push/deploy; chưa test Firebase Firestore thật hoặc iPhone vật lý.
 
 ## Production fixes rollout — 2026-11-14 — PASS
 

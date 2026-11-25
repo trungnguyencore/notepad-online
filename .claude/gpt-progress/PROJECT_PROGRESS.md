@@ -1,11 +1,11 @@
-﻿# PROJECT PROGRESS — GPT RESUME
+# PROJECT PROGRESS — GPT RESUME
 
-- Last verified: 2026-11-14 (production rollout + real Firebase 19/19 PASS)
+- Last verified: 2026-11-25 production rollout (`75861f4`: 5N image support + 5O editor polish, `firestore.rules` deployed, `npm run build` PASS, Vercel Ready & exact bundle match on `https://notepad-online-beta.vercel.app`); last automated real-Firebase suite 2026-11-14 (`1965688`, 19/19 PASS)
 - Canonical state source: `docs\PROJECT_PROGRESS.md`
-- Current rollout 2026-11-14: USER APPROVED “rồi deploy đi”, canonical 5M. Feature `1965688` pushed main → Vercel `cf1zs5ptv` READY, alias serves exact reviewed bundle `index-4u6YFiP1.js`; production real SDK/Firestore 10/10 + 9/9 PASS, cleanup=0, SEVERE=0. Latest handoff `docs/qa/2026-11-14/ROLLOUT.md`; pending-review notes below are historical.
-- Checkpoint saved 2026-11-14: `docs/qa/2026-11-13/HANDOFF.md`; source/build hashes 10/10 match and report readback 104/104, localhost 3113 HTTP 200. These are checkpoint checks, not new test runs. Next: user test/duyệt local; chưa commit/push/deploy.
-- Local QA update verified 2026-11-13: canonical 5L + `docs/qa/2026-11-13/FIXES.md`; 3 UI/UX + 2 sync findings đã sửa. 29 desktop + 29 mobile + 25 legacy + 21 full-app = 104/104 local checks; final build PASS. Local 3113 dùng persistent mock, không Firebase thật. Chưa commit/push/deploy; source uncommitted.
-- Current phase: production rollout complete, source committed; evidence/handoff saved for resume. Recovery draft/conflict flow/workspace guard và UI fixes đã lên web. Live evidence ở QA 14/11 tách với 104/104 isolated checks; physical-iPhone và mọi offline/retry scenarios vẫn chưa xác nhận. Không tự mở scope mới.
+- Current production rollout 2026-11-25 (5N + 5O): User đã kiểm thử local tại `http://localhost:3000/` và duyệt deploy. Đã deploy `firestore.rules` (thêm `/images/{imageId}`) lên `notepad-app-6845e` trước, sau đó commit `75861f4` (13 files: tính năng ảnh 5N + chỉnh sửa 5O gồm custom portal dropdown `Aa`, `color-scheme`, checklist tròn animation Apple Notes, khôi phục marker Bullet/Ordered list, Việt hóa tooltip toolbar) và push `origin/main`. Vercel deployment `https://notepad-online-d2601ikk3-trunknguen.vercel.app` Ready; alias `https://notepad-online-beta.vercel.app` trả HTTP 200 với exact bundle `index-CKZ8xk0u.js` (`871,636` bytes) & `index-1zSoJxDc.css` (`28,904` bytes). Lưu ý: không chạy lại automated live Firebase Selenium suite hay test iPhone vật lý trong lượt rollout này.
+- Local image feature 2026-11-20 (historical before 2026-11-25 rollout): canonical 5N, `npm run build` PASS (`index-DlfS2s-b.js`), Selenium isolated 19/19 PASS, `SEVERE=0`; đã được gộp rollout ở 5O ngày 2026-11-25.
+- Previous production rollout 2026-11-14: canonical 5M (`1965688` → Vercel `cf1zs5ptv`, real Firebase 10/10 + 9/9 PASS).
+- Current phase: production rollout complete for 5N + 5O, source committed & pushed (`75861f4`). Physical-iPhone và mọi offline/retry scenarios vẫn chưa xác nhận; automated live Firebase smoke cho tính năng ảnh chưa chạy riêng. Không tự mở scope mới.
 
 ## Verified current state
 - App source có `App.jsx`, FolderList/FolderDialog/FolderPicker, NoteList, NoteEditor, SyncKeyModal, ThemeToggle và EmptyState.
@@ -99,8 +99,8 @@
 - Không có test/lint script canonical trong `package.json`.
 
 ## Next actions
-1. User acceptance Global Search + Pin + Sort + Recent together with compact header/checklist on real iPhone.
-2. Continue bundle optimization + Firestore Rules hardening.
-3. Folder delete + checklist repair đã rollout và live production PASS. Còn user thử lại thao tác gốc trên iPhone thật; không tự mở phase mới.
+1. User hard-refresh / F5 tab cũ trên `https://notepad-online-beta.vercel.app` để nhận bundle mới (`index-CKZ8xk0u.js`).
+2. Nếu cần kiểm thử tự động trên production với Firebase thật cho tính năng ảnh (5N), dùng disposable Sync Key và cleanup về 0.
+3. Không tự commit/push/deploy hoặc mở rộng scope mới khi chưa có yêu cầu rõ.
 
 > Nếu mâu thuẫn, `docs\PROJECT_PROGRESS.md` và source/Git evidence mới hơn thắng.
